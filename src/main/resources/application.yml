@@ -2,9 +2,20 @@ server:
   port: 8090
 
 spring:
+  # 数据库
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/zx_cafeteria
     username: root
     password: 123456
 
+# 自定义配置
+zx:
+  # jwt 密钥
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: zx_cafeteria
+    # 设置jwt过期时间
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token

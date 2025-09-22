@@ -1,0 +1,21 @@
+package com.lzx.service;
+
+import com.lzx.dto.EmployeeLoginDto;
+import com.lzx.entity.Employee;
+import com.lzx.vo.EmployeeLoginVo;
+
+/**
+ * 员工管理服务接口
+ *
+ * @author 李正星
+ * @since 2025-09-22
+ */
+public interface EmployeeService {
+    /**
+     * 员工登录
+     *
+     * @param employeeLoginDto 员工登录传递的数据模型
+     * @return 员工实体类
+     */
+    Employee login(EmployeeLoginDto employeeLoginDto);
+}
