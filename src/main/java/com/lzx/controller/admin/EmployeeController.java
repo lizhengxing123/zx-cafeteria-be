@@ -90,7 +90,7 @@ public class EmployeeController {
     public Result<PageResult<Employee>> page(EmployeePageQueryDTO employeePageQueryDTO) {
         log.info("分页查询员工列表：{}", employeePageQueryDTO);
         PageResult<Employee> employeePageResult = employeeService.pageQuery(employeePageQueryDTO);
-        return Result.success(MessageConstant.PAGE_SUCCESS, employeePageResult);
+        return Result.success(MessageConstant.QUERY_SUCCESS, employeePageResult);
     }
 
     /**
@@ -104,6 +104,45 @@ public class EmployeeController {
     public Result<String> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
         log.info("根据 ID 禁用或启用员工：员工状态{}，员工ID{}", status, id);
         employeeService.updateStatus(status, id);
-        return Result.success(MessageConstant.UPDATE_STATUS_SUCCESS);
+        return Result.success(MessageConstant.UPDATE_SUCCESS);
+    }
+
+    /**
+     * 根据 ID 查询员工
+     *
+     * @param id 员工 ID
+     * @return Result<Employee> 根据 ID 查询员工成功返回的数据模型
+     */
+    @GetMapping("/{id}")
+    public Result<Employee> getById(@PathVariable Long id) {
+        log.info("根据 ID 查询员工：{}", id);
+        Employee employee = employeeService.getById(id);
+        return Result.success(MessageConstant.QUERY_SUCCESS, employee);
+    }
+
+    /**
+     * 根据 ID 删除员工
+     *
+     * @param id 员工 ID
+     * @return Result<String> 根据 ID 删除员工成功返回的消息
+     */
+    @DeleteMapping("/{id}")
+    public Result<String> deleteById(@PathVariable Long id) {
+        log.info("根据 ID 删除员工：{}", id);
+        employeeService.removeById(id);
+        return Result.success(MessageConstant.DELETE_SUCCESS);
+    }
+
+    /**
+     * 更新员工信息
+     *
+     * @param employeeDto 更新员工信息传递的数据模型
+     * @return Result<String> 更新员工信息成功返回的消息
+     */
+    @PutMapping("/{id}")
+    public Result<String> update(@PathVariable Long id, @RequestBody EmployeeDto employeeDto) {
+        log.info("更新员工信息：{}", employeeDto);
+        employeeService.updateById(id, employeeDto);
+        return Result.success(MessageConstant.UPDATE_SUCCESS);
     }
 }

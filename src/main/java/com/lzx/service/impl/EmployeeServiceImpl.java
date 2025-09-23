@@ -57,14 +57,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 从数据库查询员工信息
         Employee employee = employeeMapper.selectByUsername(username);
         if (employee == null) {
+            // 账号不存在
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
         if (!passwordEncoder.matches(password, employee.getPassword())) {
+            // 密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
 
         if (Objects.equals(employee.getStatus(), StatusConstant.DISABLE)) {
-            //账号被锁定
+            // 账号被锁定
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
         // 登录成功，返回员工登录成功的数据模型
@@ -142,6 +144,61 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         // 设置状态
         employee.setStatus(status);
+        // 设置更新时间和更新人
+        employee.setUpdateTime(LocalDateTime.now());
+        // 从 SecurityContextHolder 获取当前登录用户的 ID
+        Long currentUserId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        employee.setUpdateUser(currentUserId);
+        // 更新员工
+        employeeMapper.updateById(employee);
+    }
+
+    /**
+     * 根据 ID 查询员工
+     *
+     * @param id 员工 ID
+     * @return Employee 根据 ID 查询员工成功返回的员工实体类
+     */
+    @Override
+    public Employee getById(Long id) {
+        Employee employee = employeeMapper.selectById(id);
+        if (employee == null) {
+            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        return employee;
+    }
+
+    /**
+     * 根据 ID 删除员工
+     *
+     * @param id 员工 ID
+     */
+    @Override
+    public void removeById(Long id) {
+        // 根据 ID 查询员工
+        Employee employee = employeeMapper.selectById(id);
+        if (employee == null) {
+            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        // 删除员工
+        employeeMapper.deleteById(id);
+    }
+
+    /**
+     * 根据 ID 更新员工信息
+     *
+     * @param id        员工 ID
+     * @param employeeDto 更新员工信息传递的数据模型
+     */
+    @Override
+    public void updateById(Long id, EmployeeDto employeeDto) {
+        // 根据 ID 查询员工
+        Employee employee = employeeMapper.selectById(id);
+        if (employee == null) {
+            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        // 将传递过来的 EmployeeDto 属性全部拷贝到 Employee 实体类
+        BeanUtils.copyProperties(employeeDto, employee);
         // 设置更新时间和更新人
         employee.setUpdateTime(LocalDateTime.now());
         // 从 SecurityContextHolder 获取当前登录用户的 ID

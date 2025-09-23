@@ -44,4 +44,27 @@ public interface EmployeeService {
      * @param id      员工 ID
      */
     void updateStatus(Integer status, Long id);
+
+    /**
+     * 根据 ID 查询员工
+     *
+     * @param id 员工 ID
+     * @return Employee 根据 ID 查询员工成功返回的员工实体类
+     */
+    Employee getById(Long id);
+
+    /**
+     * 根据 ID 删除员工
+     *
+     * @param id 员工 ID
+     */
+    void removeById(Long id);
+
+    /**
+     * 根据 ID 更新员工信息
+     *
+     * @param id        员工 ID
+     * @param employeeDto 更新员工信息传递的数据模型
+     */
+    void updateById(Long id, EmployeeDto employeeDto);
 }

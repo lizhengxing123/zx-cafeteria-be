@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -45,7 +46,7 @@ public class Employee implements Serializable {
     /**
      * 密码，不需要展示
      */
-    @TableField(exist = false)
+    @JsonIgnore
     private String password;
 
     /**
