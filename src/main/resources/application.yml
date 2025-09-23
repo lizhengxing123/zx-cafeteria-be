@@ -14,8 +14,13 @@ zx:
   # jwt 密钥
   jwt:
     # 设置jwt签名加密时使用的秘钥
-    admin-secret-key: zx_cafeteria
+    admin-secret-key: lizhengxing_cafeteria_secret_key
     # 设置jwt过期时间
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
+  rsa:
+    # 公钥
+    public-key: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDL2Fg443yyk78Ox8CF/FTzDVtRlxFad7DCV0FyReCrbpFeJKymxcTZk5JYDS4ANEBP1oU8AqfM/5dGZibArffdk0PCSKFFJSGQhoZA3pSFRbP+1znyxdJgLrvXw0HkJnzzy+IJjqLlpVC8ExRgy8T+RYLypshb3T1p4nfLSQBmyQIDAQAB
+    # 私钥
+    private-key: MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAMvYWDjjfLKTvw7HwIX8VPMNW1GXEVp3sMJXQXJF4KtukV4krKbFxNmTklgNLgA0QE/WhTwCp8z/l0ZmJsCt992TQ8JIoUUlIZCGhkDelIVFs/7XOfLF0mAuu9fDQeQmfPPL4gmOouWlULwTFGDLxP5FgvKmyFvdPWnid8tJAGbJAgMBAAECgYAy2gSgJHfuIJdv+3rWse0LORDH2NTWabdps9S6yh3TBmEzSBjd/cYutPa0Co2oNWC5yf0wzETKChTV1hPiy0Niy83qyDL06oGyZAqH1eMzr8lH0qLrobMurRnELrcqqJ0se7v/ZjzTCoZNn5QebtgjZJF5sx2qH5m3ebdgZnL8gQJBAPc/S/CwGLHZp8bupY8yQAcjycI2f0b7w1dEvdlILIgOdb+7uY7E6Ec8XA+sX4iuuK/rTUhN/Yi1psE5ZA4yS3ECQQDTD7YmXxwcff68qlIJo/rh8a/0irhmCctTwU1cLscjzBjZLILavMoYpQaG8PgeO9UtSyJ0hPcrDbgVeI6RA7TZAkEAqqAA3TH5aMsG8M8CbAbGjubQtnl7blYSIWhsB8W6DY7FDbMURAV5Mqfh9GMFbsL861Jb+/jubWjGknPzq6Rj0QJAbprFMcaVzLiaTfRTmYm9Z7poIxavG4n2a6XZDH3XDgNe4jBZQpe8sL2KdhzBadahGGNPYxBrFrzRwy6yR3xRwQJAGqIAooEgby8KNV3AQrO6uyMYzg/W5EdiP6rNumjlcoLLJAZRBu5H7lSWXWnZDQblx/czk8ccO43v47io4e+wZw==

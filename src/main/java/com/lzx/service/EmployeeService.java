@@ -1,5 +1,6 @@
 package com.lzx.service;
 
+import com.lzx.dto.EmployeeDto;
 import com.lzx.dto.EmployeeLoginDto;
 import com.lzx.entity.Employee;
 import com.lzx.vo.EmployeeLoginVo;
@@ -18,4 +19,11 @@ public interface EmployeeService {
      * @return 员工实体类
      */
     Employee login(EmployeeLoginDto employeeLoginDto);
+
+    /**
+     * 新增员工
+     *
+     * @param employeeDto 新增员工传递的数据模型
+     */
+    void save(EmployeeDto employeeDto);
 }

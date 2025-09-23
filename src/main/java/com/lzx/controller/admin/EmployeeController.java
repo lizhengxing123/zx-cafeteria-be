@@ -2,6 +2,7 @@ package com.lzx.controller.admin;
 
 import com.lzx.constant.JwtClaimsConstant;
 import com.lzx.constant.MessageConstant;
+import com.lzx.dto.EmployeeDto;
 import com.lzx.dto.EmployeeLoginDto;
 import com.lzx.entity.Employee;
 import com.lzx.properties.JwtProperties;
@@ -64,5 +65,18 @@ public class EmployeeController {
                 .build();
 
         return Result.success(MessageConstant.LOGIN_SUCCESS, employeeLoginVo);
+    }
+
+    /**
+     * 新增员工
+     *
+     * @param employeeDto 新增员工传递的数据模型
+     * @return Result<String> 新增员工成功返回的消息
+     */
+    @PostMapping
+    public Result<String> save(@RequestBody EmployeeDto employeeDto) {
+        log.info("新增员工：{}", employeeDto);
+        employeeService.save(employeeDto);
+        return Result.success(MessageConstant.SAVE_SUCCESS);
     }
 }

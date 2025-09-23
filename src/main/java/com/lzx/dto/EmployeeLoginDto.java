@@ -1,12 +1,16 @@
 package com.lzx.dto;
 
 import lombok.Getter;
+import lombok.ToString;
+
+import java.io.Serializable;
 
 /**
  * 员工登录传递的数据模型
  */
 @Getter
-public class EmployeeLoginDto {
+@ToString
+public class EmployeeLoginDto implements Serializable {
     /**
      * 用户名
      */
@@ -16,4 +20,9 @@ public class EmployeeLoginDto {
      * 密码
      */
     private String password;
+
+    /**
+     * 加密后的AES密钥
+     */
+    private String aesKey;
 }

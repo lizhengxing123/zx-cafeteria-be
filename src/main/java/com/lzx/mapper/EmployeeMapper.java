@@ -3,6 +3,7 @@ package com.lzx.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lzx.entity.Employee;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * <p>
@@ -14,5 +15,11 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface EmployeeMapper extends BaseMapper<Employee> {
-
+    /**
+     * 根据用户名查询员工
+     * @param username 用户名
+     * @return 员工对象
+     */
+    @Select("select * from employee where username = #{username}")
+    Employee selectByUsername(String username);
 }

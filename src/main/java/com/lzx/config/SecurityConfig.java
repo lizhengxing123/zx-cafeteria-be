@@ -1,6 +1,13 @@
 package com.lzx.config;
 
+import com.lzx.constant.SecurityConstant;
+import com.lzx.filter.DecryptFilter;
 import com.lzx.filter.JwtAuthenticationFilter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * Spring Security配置类
  */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -26,6 +34,9 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private DecryptFilter decryptFilter; // 注入解密过滤器
 
     /**
      * 密码编码器
@@ -48,6 +59,7 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 // 禁用CSRF保护，因为使用JWT
                 .csrf(AbstractHttpConfigurer::disable)
@@ -56,11 +68,13 @@ public class SecurityConfig {
                 // 配置请求授权
                 .authorizeHttpRequests(authorize -> authorize
                         // 允许白名单路径
-                        .requestMatchers("/admin/employee/login", "/doc.html", "/swagger-resources/**", "/v3/api-docs/**", "/webjars/**").permitAll()
+                        .requestMatchers(SecurityConstant.WHITE_LIST_URLS).permitAll()
                         // 其他所有请求都需要认证
                         .anyRequest().authenticated()
                 )
-                // 添加JWT过滤器，放在UsernamePasswordAuthenticationFilter前面
+                // 添加解密过滤器
+                .addFilterBefore(decryptFilter, UsernamePasswordAuthenticationFilter.class)
+                // 添加 jwt 验证过滤器
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

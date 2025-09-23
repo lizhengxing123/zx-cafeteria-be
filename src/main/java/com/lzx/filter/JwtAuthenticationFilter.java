@@ -1,6 +1,8 @@
 package com.lzx.filter;
 
 import com.lzx.constant.JwtClaimsConstant;
+import com.lzx.constant.SecurityConstant;
+import com.lzx.exception.JwtAuthenticationException;
 import com.lzx.properties.JwtProperties;
 import com.lzx.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
@@ -8,6 +10,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,13 +18,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
  * JWT认证过滤器
  */
+@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -33,6 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        log.info("JwtAuthenticationFilter 执行，请求URL: {}", request.getRequestURL());
+
         try {
             // 1. 从请求头中获取 Token
             String jwt = parseJwt(request);
@@ -54,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e);
+            throw new JwtAuthenticationException("Jwt 解析异常" + e.getMessage());
         }
         // 继续执行后续过滤器
         filterChain.doFilter(request, response);
@@ -62,24 +67,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // 解析请求头中的 Token
     private String parseJwt(HttpServletRequest request) {
-        String headerAuth = request.getHeader(jwtProperties.getAdminTokenName());
-
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7); // 移除 Bearer 前缀
-        }
-
-        return null;
+        return request.getHeader(jwtProperties.getAdminTokenName());
     }
 
     // 重写该方法以排除不需要认证的路径
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        // 这里可以添加不需要过滤的路径，如登录、注册等接口
+        // 使用常量数组来检查路径是否在白名单中
         String path = request.getRequestURI();
-        return path.contains("/admin/employee/login") ||
-                path.contains("/doc.html") ||
-                path.contains("/swagger-resources") ||
-                path.contains("/v3/api-docs") ||
-                path.contains("/webjars/");
+        for (String whiteUrl : SecurityConstant.WHITE_LIST_URLS) {
+            if (path.contains(whiteUrl)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -2,19 +2,25 @@ package com.lzx.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lzx.constant.MessageConstant;
+import com.lzx.constant.PasswordConstant;
 import com.lzx.constant.StatusConstant;
+import com.lzx.dto.EmployeeDto;
 import com.lzx.dto.EmployeeLoginDto;
 import com.lzx.entity.Employee;
 import com.lzx.exception.AccountLockedException;
 import com.lzx.exception.AccountNotFoundException;
+import com.lzx.exception.DuplicateDataException;
 import com.lzx.exception.PasswordErrorException;
 import com.lzx.mapper.EmployeeMapper;
 import com.lzx.service.EmployeeService;
 import com.lzx.vo.EmployeeLoginVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -44,16 +50,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         String username = employeeLoginDto.getUsername();
         String password = employeeLoginDto.getPassword();
         // 从数据库查询员工信息
-        Employee employee = employeeMapper.selectOne(
-                new LambdaQueryWrapper<Employee>()
-                        .eq(Employee::getUsername, username)
-        );
+        Employee employee = employeeMapper.selectByUsername(username);
         if (employee == null) {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
-        // 验证密码
-        System.out.println("password: " + password);
-        System.out.println("employee password: " + employee.getPassword());
         if (!passwordEncoder.matches(password, employee.getPassword())) {
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
@@ -64,5 +64,42 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         // 登录成功，返回员工登录成功的数据模型
         return employee;
+    }
+
+    /**
+     * 新增员工
+     *
+     * @param employeeDto 新增员工传递的数据模型
+     */
+    @Override
+    public void save(EmployeeDto employeeDto) {
+        // 检查用户名是否已存在
+        Employee existingEmployee = employeeMapper.selectByUsername(employeeDto.getUsername());
+        if (existingEmployee != null) {
+            throw new DuplicateDataException(employeeDto.getUsername() + MessageConstant.ALREADY_EXISTS);
+        }
+        // 创建员工实体类
+        Employee employee = new Employee();
+        // 将传递过来的 EmployeeDto 属性全部拷贝到 Employee 实体类
+        BeanUtils.copyProperties(employeeDto, employee);
+        // 密码加密
+        String password = passwordEncoder.encode(PasswordConstant.DEFAULT_PASSWORD);
+        System.out.println("加密: " + password);
+        // 设置属性
+        employee.setPassword(password);
+        employee.setStatus(StatusConstant.ENABLE);
+
+        // 设置创建时间、更新时间
+        employee.setCreateTime(LocalDateTime.now());
+        employee.setUpdateTime(LocalDateTime.now());
+
+        // 设置创建人、修改人
+        // 从 SecurityContextHolder 获取当前登录用户的 ID
+        Long currentUserId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        employee.setCreateUser(currentUserId);
+        employee.setUpdateUser(currentUserId);
+
+        // 新增员工
+        employeeMapper.insert(employee);
     }
 }

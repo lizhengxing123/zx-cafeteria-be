@@ -25,10 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 根据员工 username 查询员工信息
-        Employee employee = employeeMapper.selectOne(
-                new LambdaQueryWrapper<Employee>().eq(Employee::getUsername, username)
-        );
-
+        Employee employee = employeeMapper.selectByUsername(username);
         if (employee == null) {
             throw new UsernameNotFoundException("用户不存在");
         }
