@@ -126,4 +126,28 @@ public class EmployeeServiceImpl implements EmployeeService {
         Page<Employee> page = employeeMapper.selectPage(new Page<>(employeePageQueryDTO.getPageNum(), employeePageQueryDTO.getPageSize()), queryWrapper);
         return new PageResult<>(page.getTotal(), page.getRecords());
     }
+
+    /**
+     * 根据 ID 禁用或启用员工
+     *
+     * @param status  状态值，1 表示启用，0 表示禁用
+     * @param id      员工 ID
+     */
+    @Override
+    public void updateStatus(Integer status, Long id) {
+        // 根据 ID 查询员工
+        Employee employee = employeeMapper.selectById(id);
+        if (employee == null) {
+            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        // 设置状态
+        employee.setStatus(status);
+        // 设置更新时间和更新人
+        employee.setUpdateTime(LocalDateTime.now());
+        // 从 SecurityContextHolder 获取当前登录用户的 ID
+        Long currentUserId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        employee.setUpdateUser(currentUserId);
+        // 更新员工
+        employeeMapper.updateById(employee);
+    }
 }

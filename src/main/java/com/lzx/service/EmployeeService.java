@@ -36,4 +36,12 @@ public interface EmployeeService {
      * @return PageResult<Employee> 分页查询员工列表成功返回的数据模型
      */
     PageResult<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
+
+    /**
+     * 根据 ID 禁用或启用员工
+     *
+     * @param status  状态值，1 表示启用，0 表示禁用
+     * @param id      员工 ID
+     */
+    void updateStatus(Integer status, Long id);
 }

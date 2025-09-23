@@ -25,6 +25,10 @@ public class MessageConstant {
      * 员工查询相关
      */
     public static final String PAGE_SUCCESS = "分页查询成功";
+    /**
+     * 员工修改相关
+     */
+    public static final String UPDATE_STATUS_SUCCESS = "修改员工状态成功";
     public static final String UNKNOWN_ERROR = "未知错误";
     public static final String USER_NOT_LOGIN = "用户未登录";
     public static final String CATEGORY_BE_RELATED_BY_SETMEAL = "当前分类关联了套餐,不能删除";

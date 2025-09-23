@@ -92,4 +92,18 @@ public class EmployeeController {
         PageResult<Employee> employeePageResult = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(MessageConstant.PAGE_SUCCESS, employeePageResult);
     }
+
+    /**
+     * 根据 ID 禁用或启用员工
+     *
+     * @param status  状态值，1 表示启用，0 表示禁用
+     * @param id      员工 ID
+     * @return Result<String> 根据 ID 禁用或启用员工成功返回的消息
+     */
+    @PostMapping("/status/{status}")
+    public Result<String> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
+        log.info("根据 ID 禁用或启用员工：员工状态{}，员工ID{}", status, id);
+        employeeService.updateStatus(status, id);
+        return Result.success(MessageConstant.UPDATE_STATUS_SUCCESS);
+    }
 }
