@@ -4,20 +4,20 @@ import com.lzx.constant.JwtClaimsConstant;
 import com.lzx.constant.MessageConstant;
 import com.lzx.dto.EmployeeDto;
 import com.lzx.dto.EmployeeLoginDto;
+import com.lzx.dto.EmployeePageQueryDTO;
 import com.lzx.entity.Employee;
 import com.lzx.properties.JwtProperties;
+import com.lzx.result.PageResult;
 import com.lzx.result.Result;
 import com.lzx.service.EmployeeService;
 import com.lzx.utils.JwtUtils;
 import com.lzx.vo.EmployeeLoginVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/admin/employee")
+@RequestMapping("/admin/employees")
 public class EmployeeController {
 
     @Autowired
@@ -52,7 +52,7 @@ public class EmployeeController {
 
         String token = JwtUtils.createJWT(
                 jwtProperties.getAdminSecretKey(),
-                employee.getId(),
+                jwtProperties.getAdminTtl(),
                 claims
         );
 
@@ -78,5 +78,18 @@ public class EmployeeController {
         log.info("新增员工：{}", employeeDto);
         employeeService.save(employeeDto);
         return Result.success(MessageConstant.SAVE_SUCCESS);
+    }
+
+    /**
+     * 分页查询员工列表
+     *
+     * @param employeePageQueryDTO 分页查询员工列表传递的数据模型
+     * @return Result<PageResult<Employee>> 分页查询员工列表成功返回的数据模型
+     */
+    @GetMapping("/page")
+    public Result<PageResult<Employee>> page(EmployeePageQueryDTO employeePageQueryDTO) {
+        log.info("分页查询员工列表：{}", employeePageQueryDTO);
+        PageResult<Employee> employeePageResult = employeeService.pageQuery(employeePageQueryDTO);
+        return Result.success(MessageConstant.PAGE_SUCCESS, employeePageResult);
     }
 }

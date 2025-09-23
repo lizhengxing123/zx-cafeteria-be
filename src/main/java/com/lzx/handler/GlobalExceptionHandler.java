@@ -3,14 +3,15 @@ package com.lzx.handler;
 import com.lzx.exception.BaseException;
 import com.lzx.result.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * 全局异常处理器，处理项目中抛出的业务异常
  */
-@RestControllerAdvice
 @Slf4j
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
@@ -20,8 +21,26 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BaseException.class)
     public Result<String> exceptionHandler(BaseException ex){
-        log.error("异常信息：{}", ex.getMessage());
+        log.error("业务异常信息：{}", ex.getMessage());
         return Result.fail(ex.getMessage());
     }
+
+    /**
+     * 捕获运行时异常
+     *//*
+    @ExceptionHandler(RuntimeException.class)
+    public Result<String> exceptionHandler(RuntimeException ex){
+        log.error("运行时异常信息：{}", ex.getMessage());
+        return Result.fail(ex.getMessage());
+    }
+
+    *//**
+     * 捕获全局异常
+     *//*
+    @ExceptionHandler(Exception.class)
+    public Result<String> exceptionHandler(Exception ex){
+        log.error("全局异常信息：{}", ex.getMessage());
+        return Result.fail(ex.getMessage());
+    }*/
 
 }

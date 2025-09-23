@@ -16,8 +16,15 @@ public class MessageConstant {
     public static final String ACCOUNT_NOT_FOUND = "账号不存在";
     public static final String ACCOUNT_LOCKED = "账号被锁定";
     public static final String LOGIN_SUCCESS = "登录成功";
+    /**
+     * 员工新增相关
+     */
     public static final String SAVE_SUCCESS = "新增成功";
     public static final String ALREADY_EXISTS = "已存在";
+    /**
+     * 员工查询相关
+     */
+    public static final String PAGE_SUCCESS = "分页查询成功";
     public static final String UNKNOWN_ERROR = "未知错误";
     public static final String USER_NOT_LOGIN = "用户未登录";
     public static final String CATEGORY_BE_RELATED_BY_SETMEAL = "当前分类关联了套餐,不能删除";

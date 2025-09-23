@@ -1,20 +1,25 @@
 package com.lzx.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lzx.constant.MessageConstant;
 import com.lzx.constant.PasswordConstant;
 import com.lzx.constant.StatusConstant;
 import com.lzx.dto.EmployeeDto;
 import com.lzx.dto.EmployeeLoginDto;
+import com.lzx.dto.EmployeePageQueryDTO;
 import com.lzx.entity.Employee;
 import com.lzx.exception.AccountLockedException;
 import com.lzx.exception.AccountNotFoundException;
 import com.lzx.exception.DuplicateDataException;
 import com.lzx.exception.PasswordErrorException;
 import com.lzx.mapper.EmployeeMapper;
+import com.lzx.result.PageResult;
 import com.lzx.service.EmployeeService;
 import com.lzx.vo.EmployeeLoginVo;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -76,7 +81,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 检查用户名是否已存在
         Employee existingEmployee = employeeMapper.selectByUsername(employeeDto.getUsername());
         if (existingEmployee != null) {
-            throw new DuplicateDataException(employeeDto.getUsername() + MessageConstant.ALREADY_EXISTS);
+            throw new DuplicateDataException("用户名【" + employeeDto.getUsername() + "】" + MessageConstant.ALREADY_EXISTS);
         }
         // 创建员工实体类
         Employee employee = new Employee();
@@ -101,5 +106,24 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 新增员工
         employeeMapper.insert(employee);
+    }
+
+    /**
+     * 分页查询员工列表
+     *
+     * @param employeePageQueryDTO 分页查询员工列表传递的数据模型
+     * @return PageResult<Employee> 分页查询员工列表成功返回的数据模型
+     */
+    @Override
+    public PageResult<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
+        // 使用名称模糊匹配
+        if (StringUtils.isNotBlank(employeePageQueryDTO.getName())) {
+            queryWrapper.like(Employee::getName, employeePageQueryDTO.getName());
+        }
+        // 根据 ID 降序排序
+        queryWrapper.orderByDesc(Employee::getId);
+        Page<Employee> page = employeeMapper.selectPage(new Page<>(employeePageQueryDTO.getPageNum(), employeePageQueryDTO.getPageSize()), queryWrapper);
+        return new PageResult<>(page.getTotal(), page.getRecords());
     }
 }

@@ -1,7 +1,9 @@
 package com.lzx.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -41,8 +43,9 @@ public class Employee implements Serializable {
     private String username;
 
     /**
-     * 密码
+     * 密码，不需要展示
      */
+    @TableField(exist = false)
     private String password;
 
     /**

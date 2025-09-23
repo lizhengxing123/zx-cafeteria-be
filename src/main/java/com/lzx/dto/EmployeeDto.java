@@ -30,7 +30,7 @@ public class EmployeeDto implements Serializable {
     /**
      * 性别
      */
-    private Integer sex;
+    private String sex;
 
     /**
      * 身份证号

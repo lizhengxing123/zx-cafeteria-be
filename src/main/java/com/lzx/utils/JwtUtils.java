@@ -5,13 +5,17 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 
+@Slf4j
 public class JwtUtils {
     /**
      * 生成jwt
@@ -24,8 +28,8 @@ public class JwtUtils {
      */
     public static String createJWT(String secretKey, long ttlMillis, Map<String, Object> claims) {
         // 生成JWT的时间
-        long expMillis = System.currentTimeMillis() + ttlMillis;
-        Date exp = new Date(expMillis);
+        Instant expirationTime = Instant.now().plus(ttlMillis, ChronoUnit.MILLIS);
+        Date exp = Date.from(expirationTime);
 
         // 设置jwt的body
         JwtBuilder builder = Jwts.builder()
