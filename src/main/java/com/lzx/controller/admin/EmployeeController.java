@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -134,14 +133,15 @@ public class EmployeeController {
     }
 
     /**
-     * 更新员工信息
+     * 根据 ID 更新员工信息
      *
+     * @param id          员工 ID
      * @param employeeDto 更新员工信息传递的数据模型
      * @return Result<String> 更新员工信息成功返回的消息
      */
     @PutMapping("/{id}")
     public Result<String> update(@PathVariable Long id, @RequestBody EmployeeDto employeeDto) {
-        log.info("更新员工信息：{}", employeeDto);
+        log.info("根据 ID 更新员工信息：员工ID{}，员工信息{}", id, employeeDto);
         employeeService.updateById(id, employeeDto);
         return Result.success(MessageConstant.UPDATE_SUCCESS);
     }

@@ -197,14 +197,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employee == null) {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
+        // 创建新的 Employee 实体类
+        Employee updatedEmployee = new Employee();
         // 将传递过来的 EmployeeDto 属性全部拷贝到 Employee 实体类
-        BeanUtils.copyProperties(employeeDto, employee);
+        BeanUtils.copyProperties(employeeDto, updatedEmployee);
+        // 设置 ID
+        updatedEmployee.setId(id);
         // 设置更新时间和更新人
-        employee.setUpdateTime(LocalDateTime.now());
+        updatedEmployee.setUpdateTime(LocalDateTime.now());
         // 从 SecurityContextHolder 获取当前登录用户的 ID
         Long currentUserId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        employee.setUpdateUser(currentUserId);
+        updatedEmployee.setUpdateUser(currentUserId);
         // 更新员工
-        employeeMapper.updateById(employee);
+        employeeMapper.updateById(updatedEmployee);
     }
 }
