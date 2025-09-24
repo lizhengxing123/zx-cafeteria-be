@@ -16,14 +16,12 @@ import com.lzx.exception.PasswordErrorException;
 import com.lzx.mapper.EmployeeMapper;
 import com.lzx.result.PageResult;
 import com.lzx.service.EmployeeService;
-import com.lzx.utils.SecurityUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -93,17 +91,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setPassword(password);
         employee.setStatus(StatusConstant.ENABLE);
 
-        // 设置创建时间、更新时间
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-
-        // 设置创建人、修改人
-        // 从 SecurityContextHolder 获取当前登录用户的 ID
-        Long currentUserId = SecurityUtil.getCurrentUserId();
-
-        employee.setCreateUser(currentUserId);
-        employee.setUpdateUser(currentUserId);
-
         // 新增员工
         employeeMapper.insert(employee);
     }
@@ -142,9 +129,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         // 设置状态
         employee.setStatus(status);
-        // 设置更新时间和更新人
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(SecurityUtil.getCurrentUserId());
         // 更新员工
         employeeMapper.updateById(employee);
     }
@@ -204,10 +188,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         BeanUtils.copyProperties(employeeDto, updatedEmployee);
         // 设置 ID
         updatedEmployee.setId(id);
-        // 设置更新时间和更新人
-        updatedEmployee.setUpdateTime(LocalDateTime.now());
-        // 从 SecurityContextHolder 获取当前登录用户的 ID
-        updatedEmployee.setUpdateUser(SecurityUtil.getCurrentUserId());
         // 更新员工
         employeeMapper.updateById(updatedEmployee);
     }

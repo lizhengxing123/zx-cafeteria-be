@@ -3,6 +3,7 @@ package com.lzx.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lzx.constant.MessageConstant;
+import com.lzx.constant.StatusConstant;
 import com.lzx.dto.CategoryDto;
 import com.lzx.dto.CategoryPageQueryDto;
 import com.lzx.entity.Category;
@@ -63,16 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
         // 拷贝数据
         BeanUtils.copyProperties(categoryDto, category);
         // 设置默认状态：禁用
-        category.setStatus(0);
-        // 设置创建时间、更新时间
-        category.setCreateTime(LocalDateTime.now());
-        category.setUpdateTime(LocalDateTime.now());
-
-        // 设置创建人、更新人
-        // 从Spring Security上下文获取当前登录用户的ID
-        Long currentUserId = SecurityUtil.getCurrentUserId();
-        category.setUpdateUser(currentUserId);
-        category.setCreateUser(currentUserId);
+        category.setStatus(StatusConstant.DISABLE);
         // 保存分类
         categoryMapper.insert(category);
     }
@@ -116,9 +108,6 @@ public class CategoryServiceImpl implements CategoryService {
         }
         // 更新状态
         category.setStatus(status);
-        // 更新更新时间和更新人
-        category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateUser(SecurityUtil.getCurrentUserId());
         // 更新分类
         categoryMapper.updateById(category);
     }
@@ -190,9 +179,6 @@ public class CategoryServiceImpl implements CategoryService {
         BeanUtils.copyProperties(categoryDto, updatedCategory);
         // 设置 ID
         updatedCategory.setId(id);
-        // 更新更新时间和更新人
-        updatedCategory.setUpdateTime(LocalDateTime.now());
-        updatedCategory.setUpdateUser(SecurityUtil.getCurrentUserId());
         // 更新分类
         categoryMapper.updateById(updatedCategory);
     }
