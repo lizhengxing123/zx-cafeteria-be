@@ -1,6 +1,7 @@
 package com.lzx.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.lzx.entity.CustomUserDetails;
 import com.lzx.entity.Employee;
 import com.lzx.mapper.EmployeeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 这里可以根据实际需求添加角色权限
         // 目前简单处理，只添加一个默认角色
-        return new User(
-                employee.getId().toString(),
+        return new CustomUserDetails(
+                employee.getId(),
+                employee.getUsername(),
                 employee.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
         );

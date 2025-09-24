@@ -8,7 +8,7 @@ public class SecurityConstant {
     public static final String FILTER_APPLIED = "alreadyDecrypted";
 
     // 登录请求路径
-    public static final String LOGIN_URL = "/admin/employee/login";
+    public static final String LOGIN_URL = "/admin/employees/login";
 
     // 不需要认证的路径
     public static final String[] WHITE_LIST_URLS = {

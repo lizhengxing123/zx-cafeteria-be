@@ -1,7 +1,6 @@
 package com.lzx.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lzx.constant.MessageConstant;
 import com.lzx.constant.PasswordConstant;
@@ -17,13 +16,12 @@ import com.lzx.exception.PasswordErrorException;
 import com.lzx.mapper.EmployeeMapper;
 import com.lzx.result.PageResult;
 import com.lzx.service.EmployeeService;
-import com.lzx.vo.EmployeeLoginVo;
+import com.lzx.utils.SecurityUtil;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -41,7 +39,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
 
     /**
      * 员工登录
@@ -102,7 +99,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 设置创建人、修改人
         // 从 SecurityContextHolder 获取当前登录用户的 ID
-        Long currentUserId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        Long currentUserId = SecurityUtil.getCurrentUserId();
+
         employee.setCreateUser(currentUserId);
         employee.setUpdateUser(currentUserId);
 
@@ -120,7 +118,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public PageResult<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
         // 使用名称模糊匹配
-        if (StringUtils.isNotBlank(employeePageQueryDTO.getName())) {
+        if (StringUtils.hasText(employeePageQueryDTO.getName())) {
             queryWrapper.like(Employee::getName, employeePageQueryDTO.getName());
         }
         // 根据 ID 降序排序
@@ -146,9 +144,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setStatus(status);
         // 设置更新时间和更新人
         employee.setUpdateTime(LocalDateTime.now());
-        // 从 SecurityContextHolder 获取当前登录用户的 ID
-        Long currentUserId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        employee.setUpdateUser(currentUserId);
+        employee.setUpdateUser(SecurityUtil.getCurrentUserId());
         // 更新员工
         employeeMapper.updateById(employee);
     }
@@ -197,6 +193,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employee == null) {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
+        // 检查用户名是否已存在
+        Employee existingEmployee = employeeMapper.selectByUsername(employeeDto.getUsername());
+        if (existingEmployee != null && !existingEmployee.getId().equals(id)) {
+            throw new DuplicateDataException("用户名【" + employeeDto.getUsername() + "】" + MessageConstant.ALREADY_EXISTS);
+        }
         // 创建新的 Employee 实体类
         Employee updatedEmployee = new Employee();
         // 将传递过来的 EmployeeDto 属性全部拷贝到 Employee 实体类
@@ -206,8 +207,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 设置更新时间和更新人
         updatedEmployee.setUpdateTime(LocalDateTime.now());
         // 从 SecurityContextHolder 获取当前登录用户的 ID
-        Long currentUserId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        updatedEmployee.setUpdateUser(currentUserId);
+        updatedEmployee.setUpdateUser(SecurityUtil.getCurrentUserId());
         // 更新员工
         employeeMapper.updateById(updatedEmployee);
     }

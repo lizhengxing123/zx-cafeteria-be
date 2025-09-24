@@ -28,7 +28,8 @@ public class JwtUtils {
      */
     public static String createJWT(String secretKey, long ttlMillis, Map<String, Object> claims) {
         // 生成JWT的时间
-        Instant expirationTime = Instant.now().plus(ttlMillis, ChronoUnit.MILLIS);
+//        Instant expirationTime = Instant.now().plus(ttlMillis, ChronoUnit.MILLIS);
+        Instant expirationTime = Instant.now().plus(1, ChronoUnit.DAYS);
         Date exp = Date.from(expirationTime);
 
         // 设置jwt的body

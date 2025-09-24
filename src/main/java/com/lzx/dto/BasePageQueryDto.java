@@ -2,8 +2,10 @@ package com.lzx.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class BasePageQueryDto {
+public class BasePageQueryDto implements Serializable {
     /**
      * 页码
      */

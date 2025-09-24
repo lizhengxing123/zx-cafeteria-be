@@ -49,7 +49,7 @@ public interface EmployeeService {
      * 根据 ID 查询员工
      *
      * @param id 员工 ID
-     * @return Employee 根据 ID 查询员工成功返回的员工实体类
+     * @return Employee 员工实体类
      */
     Employee getById(Long id);
 
