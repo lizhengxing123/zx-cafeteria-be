@@ -6,13 +6,9 @@ import lombok.ToString;
 import java.io.Serializable;
 
 /**
- * 新增、修改员工传递的数据模型
- *
- * @author 李正星
- * @since 2025-09-22
+ * 新增、更新员工传递的数据模型
  */
 @Getter
-@ToString
 public class EmployeeDto implements Serializable {
 
     /**

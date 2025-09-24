@@ -7,7 +7,7 @@ import lombok.ToString;
 import java.io.Serializable;
 
 /**
- * 新增、修改分类数传递的数据模型
+ * 新增、更新分类数传递的数据模型
  */
 @Getter
 @ToString

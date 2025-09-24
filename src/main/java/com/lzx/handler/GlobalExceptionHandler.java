@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public Result<String> exceptionHandler(RuntimeException ex){
         log.error("运行时异常信息：{}", ex.getMessage());
-        return Result.fail(ex.getMessage());
+        return Result.fail(ex.getMessage() == null ? "运行时异常" : ex.getMessage());
     }
 
     /**

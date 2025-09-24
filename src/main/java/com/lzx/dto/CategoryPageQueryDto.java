@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 分类分页查询数据模型
+ * 分类分页查询传递的数据模型
  */
 @Data
 public class CategoryPageQueryDto extends BasePageQueryDto implements Serializable {

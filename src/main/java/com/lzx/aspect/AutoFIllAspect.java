@@ -1,6 +1,7 @@
 package com.lzx.aspect;
 
 import com.lzx.constant.AutoFillConstant;
+import com.lzx.entity.DishFlavor;
 import com.lzx.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 自动填充切面类
@@ -22,9 +24,11 @@ import java.time.LocalDateTime;
 public class AutoFIllAspect {
     /**
      * 新增和修改操作的切入点表达式
+     * 匹配所有Mapper接口的insert和update方法
+     * 不包含DishFlavorMapper中的接口
      */
-    private static final String POINT_CATEGORY = "execution(* com.lzx.mapper.*Mapper.insert*(..)) || execution(* com.lzx.mapper.*Mapper.update*(..))";
-
+    private static final String POINT_CATEGORY =
+            "(execution(* com.lzx.mapper.*Mapper.insert*(..)) || execution(* com.lzx.mapper.*Mapper.update*(..))) && !execution(* com.lzx.mapper.DishFlavorMapper.*(..))";
 
     /**
      * 自动填充方法

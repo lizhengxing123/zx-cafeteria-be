@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 基础分页查询传递的数据模型
+ */
 @Data
 public class BasePageQueryDto implements Serializable {
     /**

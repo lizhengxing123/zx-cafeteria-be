@@ -39,7 +39,6 @@ public class CommonController {
     public Result<String> uploadFile(MultipartFile file) {
         try {
             String fileName = fileStorageService.storeFile(file);
-
             return Result.success(MessageConstant.UPLOAD_SUCCESS, fileName);
         } catch (IOException e) {
             log.error("文件上传失败: {}", e.getMessage());
