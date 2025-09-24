@@ -18,7 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 
 /**
@@ -33,6 +35,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsService userDetailsService; // 需自定义实现，从数据库加载用户信息
+
+    // 创建路径匹配器
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -76,7 +81,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 使用常量数组来检查路径是否在白名单中
         String path = request.getRequestURI();
         for (String whiteUrl : SecurityConstant.WHITE_LIST_URLS) {
-            if (path.contains(whiteUrl)) {
+            /*
+              使用 AntPathMatcher 是 Spring 中处理路径匹配的标准方式，
+              能完美支持 ** 通配符，确保 /files/** 匹配所有文件访问路径。
+              核心是通过 PATH_MATCHER.match(excludedPath, requestUri) 实现灵活的路径匹配，
+              避免手动字符串判断的漏洞。
+             */
+            if (pathMatcher.match(whiteUrl, path)) {
                 return true;
             }
         }

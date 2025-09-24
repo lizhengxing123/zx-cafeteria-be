@@ -13,6 +13,7 @@ public class SecurityConstant {
     // 不需要认证的路径
     public static final String[] WHITE_LIST_URLS = {
             LOGIN_URL,
+            "/files/**",
             "/admin/auth/getPublicKey",
             "/doc.html",
             "/swagger-resources",
