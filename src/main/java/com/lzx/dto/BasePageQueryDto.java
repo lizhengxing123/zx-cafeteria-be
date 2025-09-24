@@ -1,13 +1,15 @@
 package com.lzx.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
 /**
  * 基础分页查询传递的数据模型
  */
-@Data
+@Getter
+@Setter
 public class BasePageQueryDto implements Serializable {
     /**
      * 页码

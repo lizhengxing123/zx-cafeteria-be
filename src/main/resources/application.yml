@@ -35,3 +35,5 @@ zx:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # XML映射文件的路径（支持通配符）
+    mapper-locations: classpath*:mapper/**/*.xml

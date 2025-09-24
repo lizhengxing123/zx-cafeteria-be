@@ -1,5 +1,6 @@
 package com.lzx.dto;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -8,7 +9,7 @@ import java.io.Serializable;
 /**
  * 新增、更新员工传递的数据模型
  */
-@Getter
+@Data
 public class EmployeeDto implements Serializable {
 
     /**

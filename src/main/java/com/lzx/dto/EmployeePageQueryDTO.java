@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 员工分页查询数据模型
+ * 员工分页查询传递的数据模型
  */
 @Data
 public class EmployeePageQueryDTO extends BasePageQueryDto implements Serializable {

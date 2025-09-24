@@ -1,16 +1,14 @@
 package com.lzx.dto;
 
 
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.io.Serializable;
 
 /**
  * 新增、更新分类数传递的数据模型
  */
-@Getter
-@ToString
+@Data
 public class CategoryDto implements Serializable {
     /**
      * 分类名称
