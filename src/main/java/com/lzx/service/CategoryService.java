@@ -5,6 +5,8 @@ import com.lzx.dto.CategoryPageQueryDto;
 import com.lzx.entity.Category;
 import com.lzx.result.PageResult;
 
+import java.util.List;
+
 /**
  * 分类管理服务接口
  *
@@ -57,4 +59,12 @@ public interface CategoryService {
      * @param categoryDto 更新分类信息传递的数据模型
      */
     void updateById(Long id, CategoryDto categoryDto);
+
+    /**
+     * 根据分类类型查询分类列表
+     *
+     * @param type 分类类型：1 菜品分类，2 套餐分类
+     * @return List<Category> 分类列表
+     */
+    List<Category> listQuery(Integer type);
 }

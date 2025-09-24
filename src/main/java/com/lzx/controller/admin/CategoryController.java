@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 分类管理
  *
@@ -96,10 +98,23 @@ public class CategoryController {
      * @param categoryDto 更新分类信息传递的数据模型
      * @return Result<String> 更新分类信息成功返回的消息
      */
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public Result<String> update(@PathVariable Long id, @RequestBody CategoryDto categoryDto) {
         log.info("根据 ID 更新分类信息：分类ID{}，分类信息{}", id, categoryDto);
         categoryService.updateById(id, categoryDto);
         return Result.success(MessageConstant.UPDATE_SUCCESS);
+    }
+
+    /**
+     * 根据分类类型查询分类列表
+     *
+     * @param type 分类类型：1 菜品分类，2 套餐分类
+     * @return Result<List<Category>> 根据分类类型查询分类列表成功返回的数据模型
+     */
+    @GetMapping("/list")
+    public Result<List<Category>> listQuery(Integer type) {
+        log.info("根据分类类型查询分类列表：{}", type);
+        List<Category> categoryList = categoryService.listQuery(type);
+        return Result.success(MessageConstant.QUERY_SUCCESS, categoryList);
     }
 }

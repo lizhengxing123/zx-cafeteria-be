@@ -182,4 +182,20 @@ public class CategoryServiceImpl implements CategoryService {
         // 更新分类
         categoryMapper.updateById(updatedCategory);
     }
+
+    /**
+     * 根据分类类型查询分类列表
+     *
+     * @param type 分类类型：1 菜品分类，2 套餐分类
+     * @return List<Category> 分类列表
+     */
+    @Override
+    public List<Category> listQuery(Integer type) {
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        if(type != null) {
+            queryWrapper.eq(Category::getType, type);
+        }
+        queryWrapper.orderByAsc(Category::getSort);
+        return categoryMapper.selectList(queryWrapper);
+    }
 }

@@ -1,12 +1,6 @@
 package com.lzx.aspect;
 
-/**
- * 自动填充切面类
- * 用于在新增和修改操作中自动填充创建时间、创建人、更新时间和更新人字段
- */
-
 import com.lzx.constant.AutoFillConstant;
-import com.lzx.entity.Employee;
 import com.lzx.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -18,14 +12,26 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 
+/**
+ * 自动填充切面类
+ * 用于在新增和修改操作中自动填充创建时间、创建人、更新时间和更新人字段
+ */
 @Slf4j
 @Aspect
 @Component
 public class AutoFIllAspect {
-    // 定义切入点表达式
-    private static final String POINT_CATEGORY = "execution(* com.lzx.mapper.*Mapper.insert*(..)) || execution(* com.lzx.mapper.*Mapper.update*(..))";
     /**
      * 新增和修改操作的切入点表达式
+     */
+    private static final String POINT_CATEGORY = "execution(* com.lzx.mapper.*Mapper.insert*(..)) || execution(* com.lzx.mapper.*Mapper.update*(..))";
+
+
+    /**
+     * 自动填充方法
+     * @param joinPoint 连接点，用于获取当前方法的信息
+     * @throws IllegalAccessException 反射调用方法时，访问权限异常
+     * @throws NoSuchMethodException 反射调用方法时，未找到方法异常
+     * @throws InvocationTargetException 反射调用方法时，目标方法异常
      */
     @Before(POINT_CATEGORY)
     public void autoFill(JoinPoint joinPoint) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
