@@ -1,16 +1,14 @@
 package com.lzx.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lzx.constant.MessageConstant;
 import com.lzx.constant.StatusConstant;
 import com.lzx.dto.DishDto;
 import com.lzx.dto.DishPageQueryDTO;
-import com.lzx.entity.Dish;
-import com.lzx.entity.DishFlavor;
-import com.lzx.entity.Employee;
-import com.lzx.mapper.DishFlavorMapper;
-import com.lzx.mapper.DishMapper;
+import com.lzx.entity.*;
+import com.lzx.exception.DeletionNotAllowedException;
+import com.lzx.mapper.*;
 import com.lzx.result.PageResult;
 import com.lzx.service.DishService;
 import com.lzx.vo.DishVo;
@@ -18,14 +16,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import com.lzx.entity.Category;
-import com.lzx.mapper.CategoryMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class DishServiceImpl implements DishService {
@@ -34,6 +26,9 @@ public class DishServiceImpl implements DishService {
 
     @Autowired
     private DishFlavorMapper dishFlavorMapper;
+
+    @Autowired
+    private SetmealDishMapper setmealDishMapper;
 
     /**
      * 新增菜品，同时保存菜品的口味数据
@@ -46,7 +41,7 @@ public class DishServiceImpl implements DishService {
         Dish dish = new Dish();
         // 拷贝属性
         BeanUtils.copyProperties(dishDto, dish);
-        // 设置默认状态为启售
+        // 设置默认状态为起售
         dish.setStatus(StatusConstant.ENABLE);
         // 保存菜品，并获取菜品的id
         dishMapper.insert(dish);
@@ -74,5 +69,39 @@ public class DishServiceImpl implements DishService {
         // 分页查询
         Page<DishVo> page = dishMapper.selectDishWithCategoryName(new Page<>(dishPageQueryDTO.getPageNum(), dishPageQueryDTO.getPageSize()), dishPageQueryDTO);
         return new PageResult<>(page.getTotal(), page.getRecords());
+    }
+
+    /**
+     * 批量删除菜品
+     *
+     * @param ids 菜品id列表
+     */
+    @Override
+    @Transactional // 开启事务
+    public void deleteByIds(List<Long> ids) {
+        // 1、起售状态的菜品不能删除
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Dish::getId, ids);
+        queryWrapper.eq(Dish::getStatus, StatusConstant.ENABLE);
+        List<Dish> dishes = dishMapper.selectList(queryWrapper);
+        if (!dishes.isEmpty()) {
+            throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
+        }
+
+        // 2、被套餐关联的菜品不能删除
+        LambdaQueryWrapper<SetmealDish> setmealDishLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        setmealDishLambdaQueryWrapper.in(SetmealDish::getDishId, ids);
+        List<SetmealDish> setmealDishes = setmealDishMapper.selectList(setmealDishLambdaQueryWrapper);
+        if (!setmealDishes.isEmpty()) {
+            throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+        }
+
+        // 3、批量删除菜品
+        dishMapper.deleteByIds(ids);
+
+        // 4、批量删除菜品的口味数据
+        LambdaQueryWrapper<DishFlavor> dishFlavorLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        dishFlavorLambdaQueryWrapper.in(DishFlavor::getDishId, ids);
+        dishFlavorMapper.delete(dishFlavorLambdaQueryWrapper);
     }
 }

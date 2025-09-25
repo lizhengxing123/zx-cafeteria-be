@@ -1,12 +1,9 @@
 package com.lzx.config;
 
 import com.lzx.constant.SecurityConstant;
+import com.lzx.exception.JwtAuthenticationEntryPoint;
 import com.lzx.filter.DecryptFilter;
 import com.lzx.filter.JwtAuthenticationFilter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,11 +29,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    // 注入 jwt 验证过滤器
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    // 注入解密过滤器
     @Autowired
-    private DecryptFilter decryptFilter; // 注入解密过滤器
+    private DecryptFilter decryptFilter;
+
+    // 注入 jwt 认证入口点
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     /**
      * 密码编码器
@@ -71,6 +74,10 @@ public class SecurityConfig {
                         .requestMatchers(SecurityConstant.WHITE_LIST_URLS).permitAll()
                         // 其他所有请求都需要认证
                         .anyRequest().authenticated()
+                )
+                // 认证失败处理
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
                 // 添加解密过滤器
                 .addFilterBefore(decryptFilter, UsernamePasswordAuthenticationFilter.class)
