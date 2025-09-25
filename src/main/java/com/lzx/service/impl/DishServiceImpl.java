@@ -6,9 +6,15 @@ import com.lzx.constant.MessageConstant;
 import com.lzx.constant.StatusConstant;
 import com.lzx.dto.DishDto;
 import com.lzx.dto.DishPageQueryDTO;
-import com.lzx.entity.*;
+import com.lzx.entity.Dish;
+import com.lzx.entity.DishFlavor;
+import com.lzx.entity.SetmealDish;
+import com.lzx.exception.DataNotFoundException;
 import com.lzx.exception.DeletionNotAllowedException;
-import com.lzx.mapper.*;
+import com.lzx.exception.DuplicateDataException;
+import com.lzx.mapper.DishFlavorMapper;
+import com.lzx.mapper.DishMapper;
+import com.lzx.mapper.SetmealDishMapper;
 import com.lzx.result.PageResult;
 import com.lzx.service.DishService;
 import com.lzx.vo.DishVo;
@@ -16,11 +22,15 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
 @Service
 public class DishServiceImpl implements DishService {
+
+    private static final String SERVICE_NAME = "菜品";
+
     @Autowired
     private DishMapper dishMapper;
 
@@ -32,76 +42,177 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 新增菜品，同时保存菜品的口味数据
-     * @param dishDto 新增菜品传递的数据模型
      */
     @Override
-    @Transactional // 开启事务
+    @Transactional
     public void saveWithFlavors(DishDto dishDto) {
-        // 保存菜品
+        // 校验名称唯一性（新增场景）
+        checkNameDuplicate(dishDto.getName(), null);
+
+        // 保存菜品基本信息
         Dish dish = new Dish();
-        // 拷贝属性
         BeanUtils.copyProperties(dishDto, dish);
-        // 设置默认状态为起售
         dish.setStatus(StatusConstant.ENABLE);
-        // 保存菜品，并获取菜品的id
         dishMapper.insert(dish);
 
-        // 保存菜品的口味数据
-        List<DishFlavor> flavors = dishDto.getFlavors();
-        if (flavors != null && !flavors.isEmpty()) {
-            for (DishFlavor flavor : flavors) {
-                // 将菜品的口味数据的dishId设置为当前菜品的id
-                flavor.setDishId(dish.getId());
-            }
-            // 批量保存菜品的口味数据
-            dishFlavorMapper.insert(flavors);
-        }
+        // 批量保存口味数据
+        saveOrUpdateFlavors(dish.getId(), dishDto.getFlavors());
     }
 
     /**
      * 分页查询菜品列表
-     *
-     * @param dishPageQueryDTO 分页查询菜品列表传递的数据模型
-     * @return PageResult<Dish> 分页查询菜品列表成功返回的数据模型
      */
     @Override
     public PageResult<DishVo> pageQuery(DishPageQueryDTO dishPageQueryDTO) {
-        // 分页查询
-        Page<DishVo> page = dishMapper.selectDishWithCategoryName(new Page<>(dishPageQueryDTO.getPageNum(), dishPageQueryDTO.getPageSize()), dishPageQueryDTO);
+        Page<DishVo> page = dishMapper.selectDishWithCategoryName(
+                new Page<>(dishPageQueryDTO.getPageNum(), dishPageQueryDTO.getPageSize()),
+                dishPageQueryDTO
+        );
         return new PageResult<>(page.getTotal(), page.getRecords());
     }
 
     /**
      * 批量删除菜品
-     *
-     * @param ids 菜品id列表
      */
     @Override
-    @Transactional // 开启事务
+    @Transactional
     public void deleteByIds(List<Long> ids) {
-        // 1、起售状态的菜品不能删除
+        // 校验是否有起售状态的菜品
+        checkSaleStatus(ids);
+        // 校验是否被套餐关联
+        checkSetmealRelation(ids);
+
+        // 删除菜品及关联口味
+        dishMapper.deleteByIds(ids);
+        deleteFlavorsByDishIds(ids);
+    }
+
+    /**
+     * 根据 ID 停售或起售菜品
+     */
+    @Override
+    public void updateStatus(Integer status, Long id) {
+        Dish dish = checkDishExists(id);
+        dish.setStatus(status);
+        dishMapper.updateById(dish);
+    }
+
+    /**
+     * 根据 ID 查询菜品（含口味）
+     */
+    @Override
+    public DishVo getByIdWithFlavors(Long id) {
+        Dish dish = checkDishExists(id);
+
+        // 查询口味数据
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DishFlavor::getDishId, id);
+        List<DishFlavor> flavors = dishFlavorMapper.selectList(queryWrapper);
+
+        // 封装返回结果
+        DishVo dishVo = new DishVo();
+        BeanUtils.copyProperties(dish, dishVo);
+        dishVo.setFlavors(flavors);
+        return dishVo;
+    }
+
+    /**
+     * 根据 ID 更新菜品信息
+     */
+    @Override
+    @Transactional
+    public void updateByIdWithFlavors(Long id, DishDto dishDto) {
+        // 校验菜品是否存在
+        checkDishExists(id);
+        // 校验名称唯一性（更新场景，排除自身）
+        checkNameDuplicate(dishDto.getName(), id);
+
+        // 更新菜品基本信息
+        Dish updatedDish = new Dish();
+        BeanUtils.copyProperties(dishDto, updatedDish);
+        updatedDish.setId(id);
+        dishMapper.updateById(updatedDish);
+
+        // 先删除原有口味，再保存新口味
+        deleteFlavorsByDishIds(List.of(id));
+        saveOrUpdateFlavors(id, dishDto.getFlavors());
+    }
+
+    // ------------------------------ 私有工具方法 ------------------------------
+
+    /**
+     * 校验菜品是否存在，不存在则抛出异常
+     */
+    private Dish checkDishExists(Long id) {
+        Dish dish = dishMapper.selectById(id);
+        if (dish == null) {
+            throw new DataNotFoundException(SERVICE_NAME + MessageConstant.NOT_FOUND);
+        }
+        return dish;
+    }
+
+    /**
+     * 校验菜品名称是否重复
+     *
+     * @param name      菜品名称
+     * @param excludeId 排除的ID（更新时使用）
+     */
+    private void checkNameDuplicate(String name, Long excludeId) {
+        Dish existingDish = dishMapper.selectByName(name);
+        if (existingDish != null) {
+            // 新增场景：存在即重复；更新场景：存在且不是自身即重复
+            if (excludeId == null || !existingDish.getId().equals(excludeId)) {
+                throw new DuplicateDataException(SERVICE_NAME + "【" + name + "】" + MessageConstant.ALREADY_EXISTS);
+            }
+        }
+    }
+
+    /**
+     * 保存或更新菜品口味数据
+     *
+     * @param dishId  菜品ID
+     * @param flavors 口味列表
+     */
+    private void saveOrUpdateFlavors(Long dishId, List<DishFlavor> flavors) {
+        if (!CollectionUtils.isEmpty(flavors)) {
+            flavors.forEach(flavor -> flavor.setDishId(dishId));
+            dishFlavorMapper.insert(flavors);
+        }
+    }
+
+    /**
+     * 根据菜品ID删除口味数据
+     *
+     * @param dishIds 菜品ID列表
+     */
+    private void deleteFlavorsByDishIds(List<Long> dishIds) {
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(DishFlavor::getDishId, dishIds);
+        dishFlavorMapper.delete(queryWrapper);
+    }
+
+    /**
+     * 校验是否有起售状态的菜品
+     */
+    private void checkSaleStatus(List<Long> ids) {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Dish::getId, ids);
-        queryWrapper.eq(Dish::getStatus, StatusConstant.ENABLE);
+        queryWrapper.in(Dish::getId, ids)
+                .eq(Dish::getStatus, StatusConstant.ENABLE);
         List<Dish> dishes = dishMapper.selectList(queryWrapper);
-        if (!dishes.isEmpty()) {
+        if (!CollectionUtils.isEmpty(dishes)) {
             throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
         }
+    }
 
-        // 2、被套餐关联的菜品不能删除
-        LambdaQueryWrapper<SetmealDish> setmealDishLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        setmealDishLambdaQueryWrapper.in(SetmealDish::getDishId, ids);
-        List<SetmealDish> setmealDishes = setmealDishMapper.selectList(setmealDishLambdaQueryWrapper);
-        if (!setmealDishes.isEmpty()) {
+    /**
+     * 校验菜品是否被套餐关联
+     */
+    private void checkSetmealRelation(List<Long> ids) {
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(SetmealDish::getDishId, ids);
+        List<SetmealDish> setmealDishes = setmealDishMapper.selectList(queryWrapper);
+        if (!CollectionUtils.isEmpty(setmealDishes)) {
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
         }
-
-        // 3、批量删除菜品
-        dishMapper.deleteByIds(ids);
-
-        // 4、批量删除菜品的口味数据
-        LambdaQueryWrapper<DishFlavor> dishFlavorLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        dishFlavorLambdaQueryWrapper.in(DishFlavor::getDishId, ids);
-        dishFlavorMapper.delete(dishFlavorLambdaQueryWrapper);
     }
 }

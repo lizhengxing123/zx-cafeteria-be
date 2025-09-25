@@ -12,6 +12,7 @@ import com.lzx.result.PageResult;
 import com.lzx.vo.DishVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * <p>
@@ -23,6 +24,15 @@ import org.apache.ibatis.annotations.Param;
  */
 @Mapper
 public interface DishMapper extends BaseMapper<Dish> {
+
+    /**
+     * 根据名称查询分类
+     *
+     * @param name 菜品名称
+     * @return Dish 菜品实体类
+     */
+    @Select("select * from dish where name = #{name}")
+    Dish selectByName(String name);
 
     /**
      * 分页查询菜品列表

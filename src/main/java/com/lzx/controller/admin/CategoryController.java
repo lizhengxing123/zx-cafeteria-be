@@ -53,14 +53,15 @@ public class CategoryController {
     }
 
     /**
-     * 根据 ID 更新分类状态
+     * 根据 ID 禁用或启用分类
      *
      * @param status 状态值，1 表示启用，0 表示禁用
      * @param id     分类 ID
+     * @return Result<Long> 根据 ID 禁用或启用分类成功返回的消息
      */
     @PostMapping("/status/{status}")
     public Result<Long> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
-        log.info("根据 ID 更新分类状态：分类状态{}，分类ID{}", status, id);
+        log.info("根据 ID 启用或禁用分类：分类状态{}，分类ID{}", status, id);
         categoryService.updateStatus(status, id);
         return Result.success(MessageConstant.UPDATE_SUCCESS);
     }

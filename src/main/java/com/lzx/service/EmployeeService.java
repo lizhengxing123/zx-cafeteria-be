@@ -5,7 +5,6 @@ import com.lzx.dto.EmployeeLoginDto;
 import com.lzx.dto.EmployeePageQueryDTO;
 import com.lzx.entity.Employee;
 import com.lzx.result.PageResult;
-import com.lzx.vo.EmployeeLoginVo;
 
 /**
  * 员工管理服务接口
@@ -40,8 +39,8 @@ public interface EmployeeService {
     /**
      * 根据 ID 禁用或启用员工
      *
-     * @param status  状态值，1 表示启用，0 表示禁用
-     * @param id      员工 ID
+     * @param status 状态值，1 表示启用，0 表示禁用
+     * @param id     员工 ID
      */
     void updateStatus(Integer status, Long id);
 
@@ -63,7 +62,7 @@ public interface EmployeeService {
     /**
      * 根据 ID 更新员工信息
      *
-     * @param id        员工 ID
+     * @param id          员工 ID
      * @param employeeDto 更新员工信息传递的数据模型
      */
     void updateById(Long id, EmployeeDto employeeDto);

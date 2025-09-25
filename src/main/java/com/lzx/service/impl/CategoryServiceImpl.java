@@ -50,152 +50,125 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 新增分类
-     *
-     * @param categoryDto 新增分类传递的数据模型
      */
     @Override
     public void save(CategoryDto categoryDto) {
-        // 检查名称是否已存在
-        Category existingEmployee = categoryMapper.selectByName(categoryDto.getName());
-        if (existingEmployee != null) {
-            throw new DuplicateDataException(SERVICE_NAME + "【" + categoryDto.getName() + "】" + MessageConstant.ALREADY_EXISTS);
-        }
+        checkNameDuplicate(categoryDto.getName(), null);
+
         Category category = new Category();
-        // 拷贝数据
         BeanUtils.copyProperties(categoryDto, category);
-        // 设置默认状态：禁用
         category.setStatus(StatusConstant.DISABLE);
-        // 保存分类
         categoryMapper.insert(category);
     }
 
     /**
      * 分页查询分类列表
-     *
-     * @param categoryPageQueryDTO 分页查询分类列表传递的数据模型
-     * @return PageResult<Category> 分页查询分类列表成功返回的数据模型
      */
     @Override
-    public PageResult<Category> pageQuery(CategoryPageQueryDto categoryPageQueryDTO) {
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        // 构建查询条件
-        if(StringUtils.hasText(categoryPageQueryDTO.getName())){
-            queryWrapper.like(Category::getName, categoryPageQueryDTO.getName());
-        }
-        if(categoryPageQueryDTO.getType() != null){
-            queryWrapper.eq(Category::getType, categoryPageQueryDTO.getType());
-        }
-        // 根据 sort 排序
-        queryWrapper.orderByAsc(Category::getSort);
-        // 执行查询
-        Page<Category> page = categoryMapper.selectPage(new Page<>(categoryPageQueryDTO.getPageNum(), categoryPageQueryDTO.getPageSize()), queryWrapper);
-        // 构建分页结果
+    public PageResult<Category> pageQuery(CategoryPageQueryDto queryDTO) {
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<Category>()
+                .like(StringUtils.hasText(queryDTO.getName()), Category::getName, queryDTO.getName())
+                .eq(queryDTO.getType() != null, Category::getType, queryDTO.getType())
+                .orderByAsc(Category::getSort);
+
+        Page<Category> page = categoryMapper.selectPage(
+                new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize()),
+                queryWrapper
+        );
+
         return new PageResult<>(page.getTotal(), page.getRecords());
     }
 
     /**
-     * 根据 ID 启用或禁用分类
-     *
-     * @param status 状态值，1 表示启用，0 表示禁用
-     * @param id     分类 ID
+     * 根据ID启用或禁用分类
      */
     @Override
     public void updateStatus(Integer status, Long id) {
-        // 根据 ID 查询分类
-        Category category = categoryMapper.selectById(id);
-        if (category == null) {
-            throw new DataNotFoundException(SERVICE_NAME + "不存在");
-        }
-        // 更新状态
+        Category category = checkCategoryExists(id);
         category.setStatus(status);
-        // 更新分类
         categoryMapper.updateById(category);
     }
 
     /**
-     * 根据 ID 查询分类
-     *
-     * @param id 分类 ID
-     * @return Category 分类实体类
+     * 根据ID查询分类
      */
     @Override
     public Category getById(Long id) {
-        // 根据 ID 查询分类
-        Category category = categoryMapper.selectById(id);
-        if (category == null) {
-            throw new DataNotFoundException(SERVICE_NAME + "不存在");
-        }
-        return category;
+        return checkCategoryExists(id);
     }
 
     /**
-     * 根据 ID 删除分类
-     *
-     * @param id 分类 ID
+     * 根据ID删除分类
      */
     @Override
     public void removeById(Long id) {
-        // 根据 ID 查询分类
-        Category category = categoryMapper.selectById(id);
-        if (category == null) {
-            throw new DataNotFoundException(SERVICE_NAME + "不存在");
-        }
-        // 查询当前分类是否关联了菜品或套餐
-        LambdaQueryWrapper<Dish> dishQueryWrapper = new LambdaQueryWrapper<>();
-        dishQueryWrapper.eq(Dish::getCategoryId, id);
-        if (dishMapper.selectCount(dishQueryWrapper) > 0) {
+        checkCategoryExists(id);
+
+        long dishCount = dishMapper.selectCount(new LambdaQueryWrapper<Dish>()
+                .eq(Dish::getCategoryId, id));
+        if (dishCount > 0) {
             throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_DISH);
         }
-        LambdaQueryWrapper<Setmeal> setmealQueryWrapper = new LambdaQueryWrapper<>();
-        setmealQueryWrapper.eq(Setmeal::getCategoryId, id);
-        if (setmealMapper.selectCount(setmealQueryWrapper) > 0) {
+
+        long setmealCount = setmealMapper.selectCount(new LambdaQueryWrapper<Setmeal>()
+                .eq(Setmeal::getCategoryId, id));
+        if (setmealCount > 0) {
             throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_SETMEAL);
         }
-        // 删除分类
+
         categoryMapper.deleteById(id);
     }
 
     /**
-     * 根据 ID 更新分类信息
-     *
-     * @param id          分类 ID
-     * @param categoryDto 更新分类信息传递的数据模型
+     * 根据ID更新分类信息
      */
     @Override
     public void updateById(Long id, CategoryDto categoryDto) {
-        // 根据 ID 查询分类
-        Category category = categoryMapper.selectById(id);
-        if (category == null) {
-            throw new DataNotFoundException(SERVICE_NAME + "不存在");
-        }
-        // 检查名称是否已存在
-        Category existingCategory = categoryMapper.selectByName(categoryDto.getName());
-        if (existingCategory != null && !existingCategory.getId().equals(id)) {
-            throw new DuplicateDataException(SERVICE_NAME + "【" + categoryDto.getName() + "】" + MessageConstant.ALREADY_EXISTS);
-        }
-        // 创建空的 Category 实体类
+        checkCategoryExists(id);
+        checkNameDuplicate(categoryDto.getName(), id);
+
         Category updatedCategory = new Category();
-        // 拷贝数据
         BeanUtils.copyProperties(categoryDto, updatedCategory);
-        // 设置 ID
         updatedCategory.setId(id);
-        // 更新分类
         categoryMapper.updateById(updatedCategory);
     }
 
     /**
      * 根据分类类型查询分类列表
-     *
-     * @param type 分类类型：1 菜品分类，2 套餐分类
-     * @return List<Category> 分类列表
      */
     @Override
     public List<Category> listQuery(Integer type) {
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        if(type != null) {
-            queryWrapper.eq(Category::getType, type);
-        }
-        queryWrapper.orderByAsc(Category::getSort);
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<Category>()
+                .eq(type != null, Category::getType, type)
+                .orderByAsc(Category::getSort);
         return categoryMapper.selectList(queryWrapper);
+    }
+
+    // ------------------------------ 私有工具方法 ------------------------------
+
+    /**
+     * 检查分类是否存在，不存在则抛出异常
+     */
+    private Category checkCategoryExists(Long id) {
+        Category category = categoryMapper.selectById(id);
+        if (category == null) {
+            throw new DataNotFoundException(SERVICE_NAME + MessageConstant.NOT_FOUND);
+        }
+        return category;
+    }
+
+    /**
+     * 检查分类名称是否重复
+     *
+     * @param name      分类名称
+     * @param excludeId 排除的ID（更新时使用，为null表示新增）
+     */
+    private void checkNameDuplicate(String name, Long excludeId) {
+        Category existing = categoryMapper.selectByName(name);
+        if (existing != null) {
+            if (excludeId == null || !existing.getId().equals(excludeId)) {
+                throw new DuplicateDataException(SERVICE_NAME + "【" + name + "】" + MessageConstant.ALREADY_EXISTS);
+            }
+        }
     }
 }

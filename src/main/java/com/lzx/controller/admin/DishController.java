@@ -62,4 +62,45 @@ public class DishController {
         dishService.deleteByIds(ids);
         return Result.success(MessageConstant.DELETE_SUCCESS);
     }
+
+    /**
+     * 根据 ID 停售或起售菜品
+     *
+     * @param status 状态值：1 表示起售，0 表示停售
+     * @param id    菜品 ID
+     * @return Result<String> 根据 ID 停售或起售菜品成功返回的消息
+     */
+    @PostMapping("/status/{status}")
+    public Result<String> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
+        log.info("根据 ID 停售或起售菜品：{}，{}", status, id);
+        dishService.updateStatus(status, id);
+        return Result.success(MessageConstant.UPDATE_SUCCESS);
+    }
+
+    /**
+     * 根据 ID 查询菜品
+     *
+     * @param id 菜品 ID
+     * @return Result<DishVo> 根据 ID 查询菜品成功返回的数据模型
+     */
+    @GetMapping("/{id}")
+    public Result<DishVo> getById(@PathVariable Long id) {
+        log.info("根据id查询菜品：{}", id);
+        DishVo dishVo = dishService.getByIdWithFlavors(id);
+        return Result.success(MessageConstant.QUERY_SUCCESS, dishVo);
+    }
+
+    /**
+     * 根据 ID 更新菜品信息
+     *
+     * @param id          菜品 ID
+     * @param dishDto 更新菜品信息传递的数据模型
+     * @return Result<String> 更新菜品信息成功返回的消息
+     */
+    @PutMapping("/{id}")
+    public Result<String> update(@PathVariable Long id, @RequestBody DishDto dishDto) {
+        log.info("根据 ID 更新菜品信息：菜品ID{}，菜品信息{}", id, dishDto);
+        dishService.updateByIdWithFlavors(id, dishDto);
+        return Result.success(MessageConstant.UPDATE_SUCCESS);
+    }
 }
