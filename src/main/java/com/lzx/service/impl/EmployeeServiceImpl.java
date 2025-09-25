@@ -16,10 +16,12 @@ import com.lzx.exception.PasswordErrorException;
 import com.lzx.mapper.EmployeeMapper;
 import com.lzx.result.PageResult;
 import com.lzx.service.EmployeeService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Objects;
@@ -31,12 +33,11 @@ import java.util.Objects;
  * @since 2025-09-22
  */
 @Service
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class EmployeeServiceImpl implements EmployeeService {
-    @Autowired
-    private EmployeeMapper employeeMapper;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final EmployeeMapper employeeMapper;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 员工登录

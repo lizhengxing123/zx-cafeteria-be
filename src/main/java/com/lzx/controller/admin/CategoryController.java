@@ -7,6 +7,7 @@ import com.lzx.entity.Category;
 import com.lzx.result.PageResult;
 import com.lzx.result.Result;
 import com.lzx.service.CategoryService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +22,11 @@ import java.util.List;
  */
 @Slf4j
 @RestController
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 @RequestMapping("/admin/categories")
 public class CategoryController {
-    @Autowired
-    private CategoryService categoryService;
+
+    private final CategoryService categoryService;
 
     /**
      * 新增分类

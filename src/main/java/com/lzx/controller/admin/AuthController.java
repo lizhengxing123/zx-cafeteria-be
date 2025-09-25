@@ -2,22 +2,20 @@ package com.lzx.controller.admin;
 
 import com.lzx.constant.MessageConstant;
 import com.lzx.result.Result;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * 认证相关接口
  */
 @RestController
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 @RequestMapping("/admin/auth")
 public class AuthController {
 
-    @Autowired
-    private String publicKey; // 注入RSA公钥（从RsaKeyConfig获取）
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    // // 注入RSA公钥（从RsaKeyConfig获取）
+    private final String publicKey;
 
     /**
      * 提供RSA公钥给前端

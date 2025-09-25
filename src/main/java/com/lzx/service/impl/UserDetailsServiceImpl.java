@@ -1,12 +1,11 @@
 package com.lzx.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lzx.entity.CustomUserDetails;
 import com.lzx.entity.Employee;
 import com.lzx.mapper.EmployeeMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,10 +17,10 @@ import java.util.Collections;
  * UserDetailsService实现类，用于加载用户信息
  */
 @Service
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    private EmployeeMapper employeeMapper;
+    private final EmployeeMapper employeeMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

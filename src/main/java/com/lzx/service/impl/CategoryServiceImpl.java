@@ -8,26 +8,23 @@ import com.lzx.dto.CategoryDto;
 import com.lzx.dto.CategoryPageQueryDto;
 import com.lzx.entity.Category;
 import com.lzx.entity.Dish;
-import com.lzx.entity.Employee;
 import com.lzx.entity.Setmeal;
 import com.lzx.exception.DataNotFoundException;
 import com.lzx.exception.DeletionNotAllowedException;
 import com.lzx.exception.DuplicateDataException;
 import com.lzx.mapper.CategoryMapper;
 import com.lzx.mapper.DishMapper;
-import com.lzx.mapper.EmployeeMapper;
 import com.lzx.mapper.SetmealMapper;
 import com.lzx.result.PageResult;
 import com.lzx.service.CategoryService;
-import com.lzx.utils.SecurityUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 分类管理服务实现类
@@ -36,17 +33,13 @@ import java.util.List;
  * @since 2025-09-22
  */
 @Service
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class CategoryServiceImpl implements CategoryService {
     private static final String SERVICE_NAME = "分类";
 
-    @Autowired
-    private CategoryMapper categoryMapper;
-
-    @Autowired
-    private DishMapper dishMapper;
-
-    @Autowired
-    private SetmealMapper setmealMapper;
+    private final CategoryMapper categoryMapper;
+    private final DishMapper dishMapper;
+    private final SetmealMapper setmealMapper;
 
     /**
      * 新增分类
@@ -164,9 +157,9 @@ public class CategoryServiceImpl implements CategoryService {
      * @param excludeId 排除的ID（更新时使用，为null表示新增）
      */
     private void checkNameDuplicate(String name, Long excludeId) {
-        Category existing = categoryMapper.selectByName(name);
-        if (existing != null) {
-            if (excludeId == null || !existing.getId().equals(excludeId)) {
+        Category existingCategory = categoryMapper.selectByName(name);
+        if (existingCategory != null) {
+            if (!Objects.equals(existingCategory.getId(), excludeId)) {
                 throw new DuplicateDataException(SERVICE_NAME + "【" + name + "】" + MessageConstant.ALREADY_EXISTS);
             }
         }

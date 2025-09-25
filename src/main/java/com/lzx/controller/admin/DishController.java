@@ -3,11 +3,11 @@ package com.lzx.controller.admin;
 import com.lzx.constant.MessageConstant;
 import com.lzx.dto.DishDto;
 import com.lzx.dto.DishPageQueryDTO;
-import com.lzx.entity.Dish;
 import com.lzx.result.PageResult;
 import com.lzx.result.Result;
 import com.lzx.service.DishService;
 import com.lzx.vo.DishVo;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +19,11 @@ import java.util.List;
  */
 @Slf4j
 @RestController
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 @RequestMapping("/admin/dishes")
 public class DishController {
-    @Autowired
-    private DishService dishService;
+
+    private final DishService dishService;
 
     /**
      * 新增菜品

@@ -12,6 +12,7 @@ import com.lzx.result.Result;
 import com.lzx.service.EmployeeService;
 import com.lzx.utils.JwtUtils;
 import com.lzx.vo.EmployeeLoginVo;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,14 +25,12 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 @RequestMapping("/admin/employees")
 public class EmployeeController {
 
-    @Autowired
-    private EmployeeService employeeService;
-
-    @Autowired
-    private JwtProperties jwtProperties;
+    private final EmployeeService employeeService;
+    private final JwtProperties jwtProperties;
 
     /**
      * 员工登录

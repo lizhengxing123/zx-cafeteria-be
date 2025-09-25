@@ -18,6 +18,7 @@ import com.lzx.mapper.SetmealDishMapper;
 import com.lzx.result.PageResult;
 import com.lzx.service.DishService;
 import com.lzx.vo.DishVo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,20 +26,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class DishServiceImpl implements DishService {
 
     private static final String SERVICE_NAME = "菜品";
 
-    @Autowired
-    private DishMapper dishMapper;
-
-    @Autowired
-    private DishFlavorMapper dishFlavorMapper;
-
-    @Autowired
-    private SetmealDishMapper setmealDishMapper;
+    private final DishMapper dishMapper;
+    private final DishFlavorMapper dishFlavorMapper;
+    private final SetmealDishMapper setmealDishMapper;
 
     /**
      * 新增菜品，同时保存菜品的口味数据
@@ -161,7 +159,7 @@ public class DishServiceImpl implements DishService {
         Dish existingDish = dishMapper.selectByName(name);
         if (existingDish != null) {
             // 新增场景：存在即重复；更新场景：存在且不是自身即重复
-            if (excludeId == null || !existingDish.getId().equals(excludeId)) {
+            if (!Objects.equals(existingDish.getId(), excludeId)) {
                 throw new DuplicateDataException(SERVICE_NAME + "【" + name + "】" + MessageConstant.ALREADY_EXISTS);
             }
         }
