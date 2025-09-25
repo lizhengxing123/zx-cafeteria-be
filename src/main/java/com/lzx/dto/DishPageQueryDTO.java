@@ -1,8 +1,6 @@
 package com.lzx.dto;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.ToString;
 
 import java.io.Serializable;
 

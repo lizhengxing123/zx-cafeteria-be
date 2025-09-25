@@ -1,7 +1,6 @@
 package com.lzx.aspect;
 
 import com.lzx.constant.AutoFillConstant;
-import com.lzx.entity.DishFlavor;
 import com.lzx.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 自动填充切面类

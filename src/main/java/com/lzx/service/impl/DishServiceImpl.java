@@ -191,6 +191,8 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 校验是否有起售状态的菜品
+     *
+     * @param ids 菜品 ID 列表
      */
     private void checkSaleStatus(List<Long> ids) {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
@@ -204,6 +206,8 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 校验菜品是否被套餐关联
+     *
+     * @param ids 菜品 ID 列表
      */
     private void checkSetmealRelation(List<Long> ids) {
         LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();

@@ -2,7 +2,6 @@ package com.lzx.service;
 
 import com.lzx.dto.DishDto;
 import com.lzx.dto.DishPageQueryDTO;
-import com.lzx.entity.Dish;
 import com.lzx.result.PageResult;
 import com.lzx.vo.DishVo;
 

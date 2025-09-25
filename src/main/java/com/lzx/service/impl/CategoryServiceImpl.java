@@ -96,18 +96,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void removeById(Long id) {
         checkCategoryExists(id);
-
-        long dishCount = dishMapper.selectCount(new LambdaQueryWrapper<Dish>()
-                .eq(Dish::getCategoryId, id));
-        if (dishCount > 0) {
-            throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_DISH);
-        }
-
-        long setmealCount = setmealMapper.selectCount(new LambdaQueryWrapper<Setmeal>()
-                .eq(Setmeal::getCategoryId, id));
-        if (setmealCount > 0) {
-            throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_SETMEAL);
-        }
+        checkDishRelation(id);
+        checkSetmealRelation(id);
 
         categoryMapper.deleteById(id);
     }
@@ -162,6 +152,34 @@ public class CategoryServiceImpl implements CategoryService {
             if (!Objects.equals(existingCategory.getId(), excludeId)) {
                 throw new DuplicateDataException(SERVICE_NAME + "【" + name + "】" + MessageConstant.ALREADY_EXISTS);
             }
+        }
+    }
+
+    /**
+     * 校验当前分类下是否有套餐
+     *
+     * @param id 分类 ID
+     */
+    private void checkSetmealRelation(Long id) {
+        // 当前分类下有套餐，不能删除
+        long setmealCount = setmealMapper.selectCount(new LambdaQueryWrapper<Setmeal>()
+                .eq(Setmeal::getCategoryId, id));
+        if (setmealCount > 0) {
+            throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_SETMEAL);
+        }
+    }
+
+    /**
+     * 校验当前分类下是否有菜品
+     *
+     * @param id 分类 ID
+     */
+    private void checkDishRelation(Long id) {
+        // 当前分类下有菜品，不能删除
+        long dishCount = dishMapper.selectCount(new LambdaQueryWrapper<Dish>()
+                .eq(Dish::getCategoryId, id));
+        if (dishCount > 0) {
+            throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_DISH);
         }
     }
 }

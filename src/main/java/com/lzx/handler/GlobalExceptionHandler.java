@@ -1,8 +1,6 @@
 package com.lzx.handler;
 
-import com.lzx.constant.MessageConstant;
 import com.lzx.exception.BaseException;
-import com.lzx.exception.JwtAuthenticationException;
 import com.lzx.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
