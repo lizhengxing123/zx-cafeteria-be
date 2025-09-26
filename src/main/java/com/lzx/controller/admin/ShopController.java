@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController("adminShopController")
-@RequestMapping("/admin/shop")
+@RequestMapping("/admin/shops")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ShopController {
 
