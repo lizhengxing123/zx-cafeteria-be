@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -134,6 +135,34 @@ public class DishServiceImpl implements DishService {
         // 先删除原有口味，再保存新口味
         deleteFlavorsByDishIds(List.of(id));
         saveOrUpdateFlavors(id, dishDto.getFlavors());
+    }
+
+     /**
+     * 根据分类 ID 查询菜品列表
+     */
+    @Override
+    public List<DishVo> listQuery(Long categoryId) {
+        List<DishVo> dishVoList = new ArrayList<>();
+        // 1、先查询出来所有的菜品
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Dish::getCategoryId, categoryId)
+                .eq(Dish::getStatus, StatusConstant.ENABLE)
+                .orderByAsc(Dish::getId);
+        // 2、再根据查询出来的菜品ID查询菜品口味
+        List<Dish> dishList = dishMapper.selectList(queryWrapper);
+        if (!CollectionUtils.isEmpty(dishList)) {
+            dishList.forEach(dish -> {
+                DishVo dishVo = new DishVo();
+                BeanUtils.copyProperties(dish, dishVo);
+                // 查询口味数据
+                LambdaQueryWrapper<DishFlavor> flavorQueryWrapper = new LambdaQueryWrapper<>();
+                flavorQueryWrapper.eq(DishFlavor::getDishId, dish.getId());
+                List<DishFlavor> flavors = dishFlavorMapper.selectList(flavorQueryWrapper);
+                dishVo.setFlavors(flavors);
+                dishVoList.add(dishVo);
+            });
+        }
+        return dishVoList;
     }
 
     // ------------------------------ 私有工具方法 ------------------------------

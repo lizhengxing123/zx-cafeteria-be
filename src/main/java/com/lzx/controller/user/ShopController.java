@@ -27,7 +27,7 @@ public class ShopController {
     @GetMapping("/status")
     public Result<Integer> getStatus() {
         Integer status = (Integer) redisService.get(MessageConstant.REDIS_SHOP_STATUS_KEY);
-        log.info("店铺状态：{}", status);
+        log.info("[用户端] 店铺状态：{}", status);
         return Result.success(MessageConstant.QUERY_SUCCESS, status);
     }
 }

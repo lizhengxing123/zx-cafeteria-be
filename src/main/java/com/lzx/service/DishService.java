@@ -53,4 +53,12 @@ public interface DishService {
      * @param dishDto 更新菜品信息传递的数据模型
      */
     void updateByIdWithFlavors(Long id, DishDto dishDto);
+
+     /**
+     * 根据分类 ID 查询菜品列表
+     *
+     * @param categoryId 分类 ID
+     * @return List<DishVo> 菜品列表
+     */
+    List<DishVo> listQuery(Long categoryId);
 }
