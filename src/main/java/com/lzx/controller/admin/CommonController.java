@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 /**
- * 通用接口
+ * [管理端] 通用接口
  */
 @Slf4j
 @RestController

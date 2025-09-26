@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 菜品管理
+ * [管理端] 菜品管理
  */
 @Slf4j
 @RestController
@@ -71,7 +71,7 @@ public class DishController {
      * @param id    菜品 ID
      * @return Result<String> 根据 ID 停售或起售菜品成功返回的消息
      */
-    @PostMapping("/status/{status}")
+    @PutMapping("/status/{status}")
     public Result<String> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
         log.info("根据 ID 停售或起售菜品：{}，{}", status, id);
         dishService.updateStatus(status, id);

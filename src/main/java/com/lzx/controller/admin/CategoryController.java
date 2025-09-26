@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 分类管理
+ * [管理端] 分类管理
  *
  * @author 李正星
  * @since 2025-09-22
@@ -61,7 +61,7 @@ public class CategoryController {
      * @param id     分类 ID
      * @return Result<Long> 根据 ID 禁用或启用分类成功返回的消息
      */
-    @PostMapping("/status/{status}")
+    @PutMapping("/status/{status}")
     public Result<Long> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
         log.info("根据 ID 启用或禁用分类：分类状态{}，分类ID{}", status, id);
         categoryService.updateStatus(status, id);

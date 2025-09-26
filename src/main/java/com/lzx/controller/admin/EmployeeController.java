@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 员工管理
+ * [管理端] 员工管理
  */
 @Slf4j
 @RestController
@@ -98,7 +98,7 @@ public class EmployeeController {
      * @param id      员工 ID
      * @return Result<String> 根据 ID 禁用或启用员工成功返回的消息
      */
-    @PostMapping("/status/{status}")
+    @PutMapping("/status/{status}")
     public Result<String> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
         log.info("根据 ID 禁用或启用员工：员工状态{}，员工ID{}", status, id);
         employeeService.updateStatus(status, id);

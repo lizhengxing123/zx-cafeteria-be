@@ -27,6 +27,10 @@ public class MessageConstant {
     public static final String USER_NOT_LOGIN = "用户未登录";
     public static final String TOKEN_EXPIRED = "登录信息已过期";
     /**
+     * 店铺相关
+     */
+    public static final String REDIS_SHOP_STATUS_KEY = "shop-status";
+    /**
      * 新增相关
      */
     public static final String SAVE_SUCCESS = "新增成功";
