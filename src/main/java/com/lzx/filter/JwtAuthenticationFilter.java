@@ -1,7 +1,7 @@
 package com.lzx.filter;
 
-import com.lzx.constant.JwtClaimsConstant;
 import com.lzx.constant.SecurityConstant;
+import com.lzx.enums.ClientType;
 import com.lzx.exception.JwtAuthenticationException;
 import com.lzx.properties.JwtProperties;
 import com.lzx.utils.JwtUtils;
@@ -10,8 +10,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,78 +21,89 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * JWT认证过滤器
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
 
-    @Autowired
-    private UserDetailsService userDetailsService; // 需自定义实现，从数据库加载用户信息
+    @Qualifier("userUserDetailsService")
+    private final UserDetailsService userUserDetailsService;
 
-    // 创建路径匹配器
+    @Qualifier("adminUserDetailsService")
+    private final UserDetailsService adminUserDetailsService;
+
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         log.info("JwtAuthenticationFilter 执行，请求URL: {}", request.getRequestURL());
 
         try {
-            // 1. 从请求头中获取 Token
-            String jwt = parseJwt(request);
-            if (jwt != null) {
-                // 2. 从 Token 中获取信息
-                Claims claims = JwtUtils.parseJWT(jwtProperties.getAdminSecretKey(), jwt);
-                // 3. 从 Claims 中获取员工username
-                String username = claims.get(JwtClaimsConstant.USERNAME).toString();
+            String path = request.getRequestURI();
+            // 根据请求路径匹配客户端类型
+            Optional<ClientType> clientTypeOpt = ClientType.fromPath(path);
+            log.info("匹配到的客户端类型: {}", clientTypeOpt.map(ClientType::name)
+                    .orElse("未匹配到"));
 
-                // 4. 加载用户信息
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // 5. 创建认证令牌并设置到安全上下文
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            if (clientTypeOpt.isPresent()) {
+                ClientType clientType = clientTypeOpt.get();
+                String tokenHeaderName = clientType.getTokenName(jwtProperties);
+                String jwt = request.getHeader(tokenHeaderName);
+                String secretKey = clientType.getSecretKey(jwtProperties);
+                UserDetailsService userDetailsService = getMatchingUserDetailsService(clientType);
 
-                // 6. 设置认证信息到安全上下文
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (StringUtils.hasText(jwt) && StringUtils.hasText(secretKey) && userDetailsService != null) {
+                    // 解析JWT,获取用户标识符
+                    Claims claims = JwtUtils.parseJWT(secretKey, jwt);
+                    String userIdentifier = claims.get(clientType.getIdentifierKey()).toString();
+                    // 加载用户详细信息
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userIdentifier);
+                    // 创建认证令牌
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+                    // 设置认证详情
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    // 设置认证上下文
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         } catch (Exception e) {
-            throw new JwtAuthenticationException("Jwt 解析异常" + e.getMessage());
+            log.error("JWT解析异常，请求URL: {}", request.getRequestURL(), e);
+            throw new JwtAuthenticationException("JWT解析异常: " + e.getMessage());
         }
-        // 继续执行后续过滤器
+
         filterChain.doFilter(request, response);
     }
 
-    // 解析请求头中的 Token
-    private String parseJwt(HttpServletRequest request) {
-        return request.getHeader(jwtProperties.getAdminTokenName());
+    /**
+     * 根据客户端类型获取对应的UserDetailsService
+     */
+    private UserDetailsService getMatchingUserDetailsService(ClientType clientType) {
+        return switch (clientType) {
+            case ADMIN -> adminUserDetailsService;
+            case USER -> userUserDetailsService;
+        };
     }
 
-    // 重写该方法以排除不需要认证的路径
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        // 使用常量数组来检查路径是否在白名单中
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        for (String whiteUrl : SecurityConstant.WHITE_LIST_URLS) {
-            /*
-              使用 AntPathMatcher 是 Spring 中处理路径匹配的标准方式，
-              能完美支持 ** 通配符，确保 /files/** 匹配所有文件访问路径。
-              核心是通过 PATH_MATCHER.match(excludedPath, requestUri) 实现灵活的路径匹配，
-              避免手动字符串判断的漏洞。
-             */
-            if (pathMatcher.match(whiteUrl, path)) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(SecurityConstant.WHITE_LIST_URLS)
+                .anyMatch(whiteUrl -> pathMatcher.match(whiteUrl, path));
     }
 }

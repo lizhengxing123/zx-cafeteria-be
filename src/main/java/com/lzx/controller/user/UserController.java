@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/user/user")
+@RequestMapping("/user/users")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserController {
 

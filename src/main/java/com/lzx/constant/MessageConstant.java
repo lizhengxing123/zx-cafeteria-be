@@ -26,6 +26,8 @@ public class MessageConstant {
     public static final String LOGIN_SUCCESS = "登录成功";
     public static final String USER_NOT_LOGIN = "用户未登录";
     public static final String TOKEN_EXPIRED = "登录信息已过期";
+    public static final String USER_NOT_FOUND = "用户不存在";
+
     /**
      * 店铺相关
      */

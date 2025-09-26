@@ -1,8 +1,11 @@
 package com.lzx.service.impl;
 
+import com.lzx.constant.MessageConstant;
 import com.lzx.entity.CustomUserDetails;
 import com.lzx.entity.Employee;
+import com.lzx.entity.User;
 import com.lzx.mapper.EmployeeMapper;
+import com.lzx.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,28 +17,28 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 /**
- * UserDetailsService实现类，用于加载用户信息
+ * 用户端UserDetailsService实现类，用于加载用户信息
  */
-@Service
+@Service("userUserDetailsService")
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class UserUserDetailsServiceImpl implements UserDetailsService {
 
-    private final EmployeeMapper employeeMapper;
+    private final UserMapper userMapper;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 根据员工 username 查询员工信息
-        Employee employee = employeeMapper.selectByUsername(username);
-        if (employee == null) {
-            throw new UsernameNotFoundException("用户不存在");
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        // 根据用户 id 查询用户信息
+        User user = userMapper.selectById(Long.valueOf(userId));
+        if (user == null) {
+            throw new UsernameNotFoundException(MessageConstant.USER_NOT_FOUND);
         }
 
         // 这里可以根据实际需求添加角色权限
         // 目前简单处理，只添加一个默认角色
         return new CustomUserDetails(
-                employee.getId(),
-                employee.getUsername(),
-                employee.getPassword(),
+                user.getId(),
+                user.getOpenid(),
+                user.getOpenid(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
         );
     }

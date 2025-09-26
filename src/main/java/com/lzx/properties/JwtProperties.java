@@ -1,6 +1,8 @@
 package com.lzx.properties;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Component;
  * jwt令牌相关属性配置
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Component
 @ConfigurationProperties(prefix = "zx.jwt")
 public class JwtProperties {
