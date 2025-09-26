@@ -22,17 +22,22 @@ import java.time.LocalDateTime;
 public class AutoFIllAspect {
     /**
      * 新增和修改操作的切入点表达式
-     * 匹配所有Mapper接口的insert和update方法
-     * 不包含DishFlavorMapper中的接口
+     * 匹配EmployeeMapper、DishMapper、CategoryMapper接口的insert和update方法
      */
     private static final String POINT_CATEGORY =
-            "(execution(* com.lzx.mapper.*Mapper.insert*(..)) || execution(* com.lzx.mapper.*Mapper.update*(..))) && !execution(* com.lzx.mapper.DishFlavorMapper.*(..))";
+            "execution(* com.lzx.mapper.EmployeeMapper.insert*(..)) || " +
+            "execution(* com.lzx.mapper.EmployeeMapper.update*(..)) || " +
+            "execution(* com.lzx.mapper.DishMapper.insert*(..)) || " +
+            "execution(* com.lzx.mapper.DishMapper.update*(..)) || " +
+            "execution(* com.lzx.mapper.CategoryMapper.insert*(..)) || " +
+            "execution(* com.lzx.mapper.CategoryMapper.update*(..))";
 
     /**
      * 自动填充方法
+     *
      * @param joinPoint 连接点，用于获取当前方法的信息
-     * @throws IllegalAccessException 反射调用方法时，访问权限异常
-     * @throws NoSuchMethodException 反射调用方法时，未找到方法异常
+     * @throws IllegalAccessException    反射调用方法时，访问权限异常
+     * @throws NoSuchMethodException     反射调用方法时，未找到方法异常
      * @throws InvocationTargetException 反射调用方法时，目标方法异常
      */
     @Before(POINT_CATEGORY)
@@ -49,7 +54,7 @@ public class AutoFIllAspect {
         // 3、获取方法参数
         Object[] args = joinPoint.getArgs();
         log.info("当前方法参数为：{}", args);
-        if(args == null || args.length == 0) {
+        if (args == null || args.length == 0) {
             log.info("当前方法参数为空，无需自动填充");
             return;
         }
@@ -58,7 +63,7 @@ public class AutoFIllAspect {
         LocalDateTime now = LocalDateTime.now();
         Long currentUserId = SecurityUtil.getCurrentUserId();
         // 4、根据判断是新增还是修改，进行赋值
-        if(isInsert) {
+        if (isInsert) {
             // 新增操作，赋值创建时间、创建人、更新时间、更新人
             entity.getClass().getDeclaredMethod(AutoFillConstant.SET_CREATE_TIME, LocalDateTime.class).invoke(entity, now);
             entity.getClass().getDeclaredMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class).invoke(entity, now);
