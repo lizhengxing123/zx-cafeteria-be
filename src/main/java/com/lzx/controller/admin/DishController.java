@@ -1,5 +1,6 @@
 package com.lzx.controller.admin;
 
+import com.lzx.constant.CacheNameConstant;
 import com.lzx.constant.MessageConstant;
 import com.lzx.dto.DishDto;
 import com.lzx.dto.DishPageQueryDTO;
@@ -11,6 +12,7 @@ import com.lzx.vo.DishVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +35,7 @@ public class DishController {
      * @return Result<String> 新增成功返回的消息
      */
     @PostMapping
+    @CacheEvict(cacheNames = CacheNameConstant.DISH_CACHE_NAME, key = "#dishDto.categoryId")
     public Result<String> save(@RequestBody DishDto dishDto) {
         log.info("新增菜品：{}", dishDto);
         dishService.saveWithFlavors(dishDto);
@@ -59,6 +62,7 @@ public class DishController {
      * @return Result<String> 删除成功返回的消息
      */
     @DeleteMapping
+    @CacheEvict(cacheNames = CacheNameConstant.DISH_CACHE_NAME, allEntries = true)
     public Result<String> delete(@RequestParam List<Long> ids) {
         log.info("批量删除菜品：{}", ids);
         dishService.deleteByIds(ids);
@@ -73,6 +77,7 @@ public class DishController {
      * @return Result<String> 根据 ID 停售或起售菜品成功返回的消息
      */
     @PutMapping("/status/{status}")
+    @CacheEvict(cacheNames = CacheNameConstant.DISH_CACHE_NAME, allEntries = true)
     public Result<String> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
         log.info("根据 ID 停售或起售菜品：{}，{}", status, id);
         dishService.updateStatus(status, id);
@@ -100,6 +105,7 @@ public class DishController {
      * @return Result<String> 更新菜品信息成功返回的消息
      */
     @PutMapping("/{id}")
+    @CacheEvict(cacheNames = CacheNameConstant.DISH_CACHE_NAME, allEntries = true)
     public Result<String> update(@PathVariable Long id, @RequestBody DishDto dishDto) {
         log.info("根据 ID 更新菜品信息：菜品ID{}，菜品信息{}", id, dishDto);
         dishService.updateByIdWithFlavors(id, dishDto);
@@ -115,7 +121,7 @@ public class DishController {
     @GetMapping("/list")
     public Result<List<Dish>> listQuery(@RequestParam Long categoryId) {
         log.info("根据分类 ID 查询菜品列表：{}", categoryId);
-        List<Dish> dishList = dishService.listQuery(categoryId);
+        List<Dish> dishList = dishService.listQuery(categoryId, null);
         return Result.success(MessageConstant.QUERY_SUCCESS, dishList);
     }
 }

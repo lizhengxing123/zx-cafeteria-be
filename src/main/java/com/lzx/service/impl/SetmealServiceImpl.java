@@ -22,6 +22,7 @@ import com.lzx.vo.DishItemVO;
 import com.lzx.vo.DishVo;
 import com.lzx.vo.SetmealVo;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 套餐服务实现类
@@ -126,9 +129,7 @@ public class SetmealServiceImpl implements SetmealService {
         Setmeal setmeal = checkSetmealExists(id);
 
         // 查询关联的菜品数据
-        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(SetmealDish::getSetmealId, id);
-        List<SetmealDish> setmealDishes = setmealDishMapper.selectList(queryWrapper);
+        List<SetmealDish> setmealDishes = getSetmealDishesBySetmealId(id);
 
         // 封装返回结果
         SetmealVo setmealVo = new SetmealVo();
@@ -169,10 +170,10 @@ public class SetmealServiceImpl implements SetmealService {
      * @return List<Setmeal> 套餐列表
      */
     @Override
-    public List<Setmeal> listQuery(Long categoryId) {
+    public List<Setmeal> listQuery(Long categoryId, Integer status) {
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Setmeal::getCategoryId, categoryId)
-                .eq(Setmeal::getStatus, StatusConstant.ENABLE)
+                .eq(status != null, Setmeal::getStatus, status)
                 .orderByAsc(Setmeal::getId);
         return setmealMapper.selectList(queryWrapper);
     }
@@ -181,21 +182,32 @@ public class SetmealServiceImpl implements SetmealService {
      * 根据分类 ID 查询套餐列表，带关联菜品数据
      *
      * @param categoryId 分类 ID
+     * @param status     状态值：1 表示起售，0 表示停售
      * @return List<SetmealVo> 套餐列表，每个套餐包含关联的菜品数据
      */
     @Override
-    public List<SetmealVo> listQueryWithDishes(Long categoryId) {
-        // 查询套餐列表
-        List<Setmeal> setmealList = listQuery(categoryId);
+    public List<SetmealVo> listQueryWithDishes(Long categoryId, Integer status) {
+        // 1、查询套餐列表
+        List<Setmeal> setmealList = listQuery(categoryId, status);
         if (CollectionUtils.isEmpty(setmealList)) {
             return new ArrayList<>();
         }
+        // 2、查询所有套餐的菜品数据
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(SetmealDish::getSetmealId, setmealList.stream().map(Setmeal::getId).collect(Collectors.toList()));
+        List<SetmealDish> setmealDishes = setmealDishMapper.selectList(queryWrapper);
+
+        // 3、将菜品数据按套餐ID分组，便于快速匹配
+        Map<Long, List<SetmealDish>> dishesMap = setmealDishes.stream()
+                .collect(Collectors.groupingBy(SetmealDish::getSetmealId));
 
         // 封装返回结果
         List<SetmealVo> setmealVoList = new ArrayList<>();
         for (Setmeal setmeal : setmealList) {
             // 根据套餐ID查询关联的菜品
-            SetmealVo setmealVo = getByIdWithDishes(setmeal.getId());
+            SetmealVo setmealVo = new SetmealVo();
+            BeanUtils.copyProperties(setmeal, setmealVo);
+            setmealVo.setSetmealDishes(dishesMap.getOrDefault(setmeal.getId(), new ArrayList<>()));
             setmealVoList.add(setmealVo);
         }
         return setmealVoList;
@@ -267,6 +279,18 @@ public class SetmealServiceImpl implements SetmealService {
         LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(SetmealDish::getSetmealId, setmealIds);
         setmealDishMapper.delete(queryWrapper);
+    }
+
+    /**
+     * 根据套餐ID查询套餐关联的菜品数据
+     *
+     * @param setmealId 套餐ID
+     * @return List<SetmealDish> 套餐关联的菜品列表
+     */
+     private List<SetmealDish> getSetmealDishesBySetmealId(Long setmealId) {
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SetmealDish::getSetmealId, setmealId);
+        return setmealDishMapper.selectList(queryWrapper);
     }
 
     /**

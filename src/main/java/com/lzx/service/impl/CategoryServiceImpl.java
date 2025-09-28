@@ -136,12 +136,14 @@ public class CategoryServiceImpl implements CategoryService {
      * 根据分类类型查询分类列表
      *
      * @param type 分类类型：1 菜品分类，2 套餐分类
+     * @param status 状态值，1 表示启用，0 表示禁用
      * @return List<Category> 分类列表
      */
     @Override
-    public List<Category> listQuery(Integer type) {
+    public List<Category> listQuery(Integer type, Integer status) {
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<Category>()
                 .eq(type != null, Category::getType, type)
+                .eq(status != null, Category::getStatus, status)
                 .orderByAsc(Category::getSort);
         return categoryMapper.selectList(queryWrapper);
     }

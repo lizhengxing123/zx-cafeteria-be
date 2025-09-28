@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * [管理端] 认证相关接口
+ * [管理端] 认证接口
  */
 @RestController
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})

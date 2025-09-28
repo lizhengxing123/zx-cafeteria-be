@@ -1,6 +1,8 @@
 package com.lzx.controller.user;
 
+import com.lzx.constant.CacheNameConstant;
 import com.lzx.constant.MessageConstant;
+import com.lzx.constant.StatusConstant;
 import com.lzx.entity.Setmeal;
 import com.lzx.result.Result;
 import com.lzx.service.SetmealService;
@@ -8,6 +10,7 @@ import com.lzx.vo.DishItemVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,9 +32,10 @@ public class SetmealController {
      * @return Result<List < SetmealVo>> 套餐列表，每个套餐包含菜品信息
      */
     @GetMapping("/list")
+    @Cacheable(cacheNames = CacheNameConstant.SETMEAL_CACHE_NAME, key = "#categoryId")
     public Result<List<Setmeal>> listQuery(@RequestParam Long categoryId) {
         log.info("[用户端] 根据分类 ID 查询套餐列表：{}", categoryId);
-        List<Setmeal> setmealList = setmealService.listQuery(categoryId);
+        List<Setmeal> setmealList = setmealService.listQuery(categoryId, StatusConstant.ENABLE);
         return Result.success(MessageConstant.QUERY_SUCCESS, setmealList);
     }
 

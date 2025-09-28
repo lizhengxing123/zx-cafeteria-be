@@ -27,7 +27,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
@@ -160,10 +162,10 @@ public class DishServiceImpl implements DishService {
      * @return List<Dish> 菜品列表
      */
     @Override
-    public List<Dish> listQuery(Long categoryId) {
+    public List<Dish> listQuery(Long categoryId, Integer status) {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Dish::getCategoryId, categoryId)
-                .eq(Dish::getStatus, StatusConstant.ENABLE)
+                .eq(status != null, Dish::getStatus, status)
                 .orderByAsc(Dish::getId);
         return dishMapper.selectList(queryWrapper);
     }
@@ -175,18 +177,29 @@ public class DishServiceImpl implements DishService {
      * @return List<DishVo> 菜品列表，每个菜品包含口味数据
      */
     @Override
-    public List<DishVo> listQueryWithFlavors(Long categoryId) {
-        // 查询菜品列表
-        List<Dish> dishList = listQuery(categoryId);
+    public List<DishVo> listQueryWithFlavors(Long categoryId, Integer status) {
+        // 1、查询所有菜品列表
+        List<Dish> dishList = listQuery(categoryId, status);
         if (CollectionUtils.isEmpty(dishList)) {
             return new ArrayList<>();
         }
 
+        // 2、查询所有菜品的口味数据
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(DishFlavor::getDishId, dishList.stream().map(Dish::getId).collect(Collectors.toList()));
+        List<DishFlavor> flavors = dishFlavorMapper.selectList(queryWrapper);
+
+        // 3、将口味数据按菜品ID分组，便于快速匹配
+        Map<Long, List<DishFlavor>> flavorsMap = flavors.stream()
+                .collect(Collectors.groupingBy(DishFlavor::getDishId));
+
         // 封装返回结果
         List<DishVo> dishVoList = new ArrayList<>();
         for (Dish dish : dishList) {
-            // 根据菜品ID查询口味
-            DishVo dishVo = getByIdWithFlavors(dish.getId());
+            DishVo dishVo = new DishVo();
+            BeanUtils.copyProperties(dish, dishVo);
+            // 直接从Map中获取口味，避免再次查询数据库
+            dishVo.setFlavors(flavorsMap.getOrDefault(dish.getId(), new ArrayList<>()));
             dishVoList.add(dishVo);
         }
         return dishVoList;

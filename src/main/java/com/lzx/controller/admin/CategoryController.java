@@ -1,5 +1,6 @@
 package com.lzx.controller.admin;
 
+import com.lzx.constant.CacheNameConstant;
 import com.lzx.constant.MessageConstant;
 import com.lzx.dto.CategoryDto;
 import com.lzx.dto.CategoryPageQueryDto;
@@ -10,6 +11,7 @@ import com.lzx.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,6 +64,8 @@ public class CategoryController {
      * @return Result<Long> 根据 ID 禁用或启用分类成功返回的消息
      */
     @PutMapping("/status/{status}")
+    // 清除菜品缓存和套餐缓存，因为分类状态改变会影响到菜品和套餐的显示
+    @CacheEvict(cacheNames = {CacheNameConstant.DISH_CACHE_NAME, CacheNameConstant.SETMEAL_CACHE_NAME}, key = "#id")
     public Result<Long> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
         log.info("根据 ID 启用或禁用分类：分类状态{}，分类ID{}", status, id);
         categoryService.updateStatus(status, id);
@@ -88,6 +92,8 @@ public class CategoryController {
      * @return Result<String> 根据 ID 删除分类成功返回的消息
      */
     @DeleteMapping("/{id}")
+    // 清除菜品缓存和套餐缓存，因为删除分类会影响到菜品和套餐的显示
+    @CacheEvict(cacheNames = {CacheNameConstant.DISH_CACHE_NAME, CacheNameConstant.SETMEAL_CACHE_NAME}, key = "#id")
     public Result<Long> delete(@PathVariable Long id) {
         log.info("根据 ID删除分类：{}", id);
         categoryService.removeById(id);
@@ -117,7 +123,7 @@ public class CategoryController {
     @GetMapping("/list")
     public Result<List<Category>> listQuery(@RequestParam(required = false) Integer type) {
         log.info("根据分类类型查询分类列表：{}", type);
-        List<Category> categoryList = categoryService.listQuery(type);
+        List<Category> categoryList = categoryService.listQuery(type, null);
         return Result.success(MessageConstant.QUERY_SUCCESS, categoryList);
     }
 }

@@ -1,5 +1,6 @@
 package com.lzx.controller.admin;
 
+import com.lzx.constant.CacheNameConstant;
 import com.lzx.constant.MessageConstant;
 import com.lzx.dto.SetmealDto;
 import com.lzx.dto.SetmealPageQueryDTO;
@@ -11,6 +12,7 @@ import com.lzx.vo.SetmealVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +35,7 @@ public class SetmealController {
      * @return Result<String> 新增成功返回的消息
      */
     @PostMapping
+    @CacheEvict(cacheNames = CacheNameConstant.SETMEAL_CACHE_NAME, key = "#setmealDto.categoryId")
     public Result<String> save(@RequestBody SetmealDto setmealDto) {
         log.info("新增套餐：{}", setmealDto);
         setmealService.saveWithDishes(setmealDto);
@@ -59,6 +62,7 @@ public class SetmealController {
      * @return Result<String> 删除成功返回的消息
      */
     @DeleteMapping
+    @CacheEvict(cacheNames = CacheNameConstant.SETMEAL_CACHE_NAME, allEntries = true)
     public Result<String> delete(@RequestParam List<Long> ids) {
         log.info("批量删除套餐：{}", ids);
         setmealService.deleteByIds(ids);
@@ -73,6 +77,7 @@ public class SetmealController {
      * @return Result<String> 根据 ID 停售或起售套餐成功返回的消息
      */
     @PutMapping("/status/{status}")
+    @CacheEvict(cacheNames = CacheNameConstant.SETMEAL_CACHE_NAME, allEntries = true)
     public Result<String> updateStatus(@PathVariable Integer status, @RequestParam Long id) {
         log.info("根据 ID 停售或起售套餐：{}，{}", status, id);
         setmealService.updateStatus(status, id);
@@ -100,6 +105,7 @@ public class SetmealController {
      * @return Result<String> 更新套餐信息成功返回的消息
      */
     @PutMapping("/{id}")
+    @CacheEvict(cacheNames = CacheNameConstant.SETMEAL_CACHE_NAME, allEntries = true)
     public Result<String> update(@PathVariable Long id, @RequestBody SetmealDto setmealDto) {
         log.info("根据 ID 更新套餐信息：套餐ID{}，套餐信息{}", id, setmealDto);
         setmealService.updateByIdWithDishes(id, setmealDto);
@@ -115,7 +121,7 @@ public class SetmealController {
     @GetMapping("/list")
     public Result<List<Setmeal>> listQuery(@RequestParam Long categoryId) {
         log.info("根据分类 ID 查询套餐列表：{}", categoryId);
-        List<Setmeal> setmealList = setmealService.listQuery(categoryId);
+        List<Setmeal> setmealList = setmealService.listQuery(categoryId, null);
         return Result.success(MessageConstant.QUERY_SUCCESS, setmealList);
     }
 }

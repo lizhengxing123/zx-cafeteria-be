@@ -64,17 +64,19 @@ public interface SetmealService {
      * 根据分类 ID 查询套餐列表
      *
      * @param categoryId 分类 ID
+     * @param status     状态值：1 表示起售，0 表示停售
      * @return List<Setmeal> 套餐列表
      */
-    List<Setmeal> listQuery(Long categoryId);
+    List<Setmeal> listQuery(Long categoryId, Integer status);
 
     /**
      * 根据分类 ID 查询套餐列表（包含菜品信息）
      *
      * @param categoryId 分类 ID
+     * @param status     状态值：1 表示起售，0 表示停售
      * @return List<SetmealVo> 套餐列表（包含菜品信息）
      */
-    List<SetmealVo> listQueryWithDishes(Long categoryId);
+    List<SetmealVo> listQueryWithDishes(Long categoryId, Integer status);
 
     /**
      * 根据套餐 ID 查询菜品数据

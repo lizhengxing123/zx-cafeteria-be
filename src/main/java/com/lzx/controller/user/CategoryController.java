@@ -1,6 +1,7 @@
 package com.lzx.controller.user;
 
 import com.lzx.constant.MessageConstant;
+import com.lzx.constant.StatusConstant;
 import com.lzx.entity.Category;
 import com.lzx.result.Result;
 import com.lzx.service.CategoryService;
@@ -34,7 +35,7 @@ public class CategoryController {
     @GetMapping("/list")
     public Result<List<Category>> listQuery(@RequestParam(required = false) Integer type) {
         log.info("[用户端] 根据分类类型查询分类列表：{}", type);
-        List<Category> categoryList = categoryService.listQuery(type);
+        List<Category> categoryList = categoryService.listQuery(type, StatusConstant.ENABLE);
         return Result.success(MessageConstant.QUERY_SUCCESS, categoryList);
     }
 }

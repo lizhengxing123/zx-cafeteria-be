@@ -59,15 +59,17 @@ public interface DishService {
      * 根据分类 ID 查询菜品列表
      *
      * @param categoryId 分类 ID
+      * @param status 状态值：1 表示起售，0 表示停售
      * @return List<Dish> 菜品列表
      */
-    List<Dish> listQuery(Long categoryId);
+    List<Dish> listQuery(Long categoryId, Integer status);
 
      /**
      * 根据分类 ID 查询菜品列表，带口味数据
      *
      * @param categoryId 分类 ID
+      * @param status 状态值：1 表示起售，0 表示停售
      * @return List<DishVo> 菜品列表
      */
-    List<DishVo> listQueryWithFlavors(Long categoryId);
+    List<DishVo> listQueryWithFlavors(Long categoryId, Integer status);
 }

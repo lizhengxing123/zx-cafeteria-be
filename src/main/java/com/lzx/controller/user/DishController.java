@@ -1,12 +1,15 @@
 package com.lzx.controller.user;
 
+import com.lzx.constant.CacheNameConstant;
 import com.lzx.constant.MessageConstant;
+import com.lzx.constant.StatusConstant;
 import com.lzx.result.Result;
 import com.lzx.service.DishService;
 import com.lzx.vo.DishVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,9 +34,10 @@ public class DishController {
      * @return Result<List < DishVo>> 菜品列表（包含菜品口味）
      */
     @GetMapping("/list")
+    @Cacheable(cacheNames = CacheNameConstant.DISH_CACHE_NAME, key = "#categoryId")
     public Result<List<DishVo>> listQuery(@RequestParam Long categoryId) {
         log.info("[用户端] 根据分类 ID 查询菜品列表：{}", categoryId);
-        List<DishVo> dishVoList = dishService.listQueryWithFlavors(categoryId);
+        List<DishVo> dishVoList = dishService.listQueryWithFlavors(categoryId, StatusConstant.ENABLE);
         return Result.success(MessageConstant.QUERY_SUCCESS, dishVoList);
     }
 }
