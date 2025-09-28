@@ -43,6 +43,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 新增分类
+     *
+     * @param categoryDto 新增分类传递的数据模型
      */
     @Override
     public void save(CategoryDto categoryDto) {
@@ -56,6 +58,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 分页查询分类列表
+     *
+     * @param queryDTO 分页查询分类列表传递的数据模型
+     * @return PageResult<Category> 分页查询分类列表成功返回的数据模型
      */
     @Override
     public PageResult<Category> pageQuery(CategoryPageQueryDto queryDTO) {
@@ -74,6 +79,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 根据ID启用或禁用分类
+     *
+     * @param status 状态值，1 表示启用，0 表示禁用
+     * @param id     分类 ID
      */
     @Override
     public void updateStatus(Integer status, Long id) {
@@ -84,6 +92,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 根据ID查询分类
+     *
+     * @param id 分类 ID
+     * @return Category 分类实体类
      */
     @Override
     public Category getById(Long id) {
@@ -92,6 +103,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 根据ID删除分类
+     *
+     * @param id 分类 ID
      */
     @Override
     public void removeById(Long id) {
@@ -104,6 +117,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 根据ID更新分类信息
+     *
+     * @param id          分类 ID
+     * @param categoryDto 更新分类信息传递的数据模型
      */
     @Override
     public void updateById(Long id, CategoryDto categoryDto) {
@@ -118,6 +134,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 根据分类类型查询分类列表
+     *
+     * @param type 分类类型：1 菜品分类，2 套餐分类
+     * @return List<Category> 分类列表
      */
     @Override
     public List<Category> listQuery(Integer type) {

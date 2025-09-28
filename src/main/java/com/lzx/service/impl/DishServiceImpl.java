@@ -41,6 +41,8 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 新增菜品，同时保存菜品的口味数据
+     *
+     * @param dishDto 新增菜品传递的数据模型
      */
     @Override
     @Transactional
@@ -60,6 +62,9 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 分页查询菜品列表
+     *
+     * @param dishPageQueryDTO 分页查询菜品列表传递的数据模型
+     * @return PageResult<DishVo> 分页查询菜品列表成功返回的数据模型
      */
     @Override
     public PageResult<DishVo> pageQuery(DishPageQueryDTO dishPageQueryDTO) {
@@ -72,6 +77,8 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 批量删除菜品
+     *
+     * @param ids 菜品 ID 列表
      */
     @Override
     @Transactional
@@ -88,6 +95,9 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 根据 ID 停售或起售菜品
+     *
+     * @param status 状态值：1 表示起售，0 表示停售
+     * @param id     菜品 ID
      */
     @Override
     public void updateStatus(Integer status, Long id) {
@@ -98,6 +108,9 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 根据 ID 查询菜品（含口味）
+     *
+     * @param id 菜品 ID
+     * @return DishVo 根据 ID 查询菜品成功返回的数据模型
      */
     @Override
     public DishVo getByIdWithFlavors(Long id) {
@@ -117,6 +130,9 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 根据 ID 更新菜品信息
+     *
+     * @param id      菜品 ID
+     * @param dishDto 更新菜品信息传递的数据模型
      */
     @Override
     @Transactional
@@ -137,30 +153,41 @@ public class DishServiceImpl implements DishService {
         saveOrUpdateFlavors(id, dishDto.getFlavors());
     }
 
-     /**
+    /**
      * 根据分类 ID 查询菜品列表
+     *
+     * @param categoryId 分类 ID
+     * @return List<Dish> 菜品列表
      */
     @Override
-    public List<DishVo> listQuery(Long categoryId) {
-        List<DishVo> dishVoList = new ArrayList<>();
-        // 1、先查询出来所有的菜品
+    public List<Dish> listQuery(Long categoryId) {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Dish::getCategoryId, categoryId)
                 .eq(Dish::getStatus, StatusConstant.ENABLE)
                 .orderByAsc(Dish::getId);
-        // 2、再根据查询出来的菜品ID查询菜品口味
-        List<Dish> dishList = dishMapper.selectList(queryWrapper);
-        if (!CollectionUtils.isEmpty(dishList)) {
-            dishList.forEach(dish -> {
-                DishVo dishVo = new DishVo();
-                BeanUtils.copyProperties(dish, dishVo);
-                // 查询口味数据
-                LambdaQueryWrapper<DishFlavor> flavorQueryWrapper = new LambdaQueryWrapper<>();
-                flavorQueryWrapper.eq(DishFlavor::getDishId, dish.getId());
-                List<DishFlavor> flavors = dishFlavorMapper.selectList(flavorQueryWrapper);
-                dishVo.setFlavors(flavors);
-                dishVoList.add(dishVo);
-            });
+        return dishMapper.selectList(queryWrapper);
+    }
+
+    /**
+     * 根据分类 ID 查询菜品列表，带口味数据
+     *
+     * @param categoryId 分类 ID
+     * @return List<DishVo> 菜品列表，每个菜品包含口味数据
+     */
+    @Override
+    public List<DishVo> listQueryWithFlavors(Long categoryId) {
+        // 查询菜品列表
+        List<Dish> dishList = listQuery(categoryId);
+        if (CollectionUtils.isEmpty(dishList)) {
+            return new ArrayList<>();
+        }
+
+        // 封装返回结果
+        List<DishVo> dishVoList = new ArrayList<>();
+        for (Dish dish : dishList) {
+            // 根据菜品ID查询口味
+            DishVo dishVo = getByIdWithFlavors(dish.getId());
+            dishVoList.add(dishVo);
         }
         return dishVoList;
     }
@@ -169,6 +196,9 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 校验菜品是否存在，不存在则抛出异常
+     *
+     * @param id 菜品 ID
+     * @return Dish 校验通过返回的菜品实体类
      */
     private Dish checkDishExists(Long id) {
         Dish dish = dishMapper.selectById(id);

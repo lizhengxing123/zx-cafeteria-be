@@ -2,6 +2,7 @@ package com.lzx.service;
 
 import com.lzx.dto.DishDto;
 import com.lzx.dto.DishPageQueryDTO;
+import com.lzx.entity.Dish;
 import com.lzx.result.PageResult;
 import com.lzx.vo.DishVo;
 
@@ -26,7 +27,7 @@ public interface DishService {
     /**
      * 批量删除菜品
      *
-     * @param ids 菜品id列表
+     * @param ids 菜品 ID 列表
      */
     void deleteByIds(List<Long> ids);
 
@@ -58,7 +59,15 @@ public interface DishService {
      * 根据分类 ID 查询菜品列表
      *
      * @param categoryId 分类 ID
+     * @return List<Dish> 菜品列表
+     */
+    List<Dish> listQuery(Long categoryId);
+
+     /**
+     * 根据分类 ID 查询菜品列表，带口味数据
+     *
+     * @param categoryId 分类 ID
      * @return List<DishVo> 菜品列表
      */
-    List<DishVo> listQuery(Long categoryId);
+    List<DishVo> listQueryWithFlavors(Long categoryId);
 }

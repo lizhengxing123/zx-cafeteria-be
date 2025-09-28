@@ -115,7 +115,7 @@ public class CategoryController {
      * @return Result<List<Category>> 根据分类类型查询分类列表成功返回的数据模型
      */
     @GetMapping("/list")
-    public Result<List<Category>> listQuery(Integer type) {
+    public Result<List<Category>> listQuery(@RequestParam(required = false) Integer type) {
         log.info("根据分类类型查询分类列表：{}", type);
         List<Category> categoryList = categoryService.listQuery(type);
         return Result.success(MessageConstant.QUERY_SUCCESS, categoryList);

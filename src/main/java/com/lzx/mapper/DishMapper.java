@@ -33,7 +33,7 @@ public interface DishMapper extends BaseMapper<Dish> {
      *
      * @param page 分页数据
      * @param dishPageQueryDTO 查询条件
-     * @return IPage<DishVo> 分页查询菜品列表成功返回的数据模型
+     * @return Page<DishVo> 分页查询菜品列表成功返回的数据模型
      */
     Page<DishVo> selectDishWithCategoryName(Page<Dish> page, DishPageQueryDTO dishPageQueryDTO);
 }

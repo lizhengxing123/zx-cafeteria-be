@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class AutoFIllAspect {
     /**
      * 新增和修改操作的切入点表达式
-     * 匹配EmployeeMapper、DishMapper、CategoryMapper接口的insert和update方法
+     * 匹配EmployeeMapper、DishMapper、CategoryMapper、SetmealMapper接口的insert和update方法
      */
     private static final String POINT_CATEGORY =
             "execution(* com.lzx.mapper.EmployeeMapper.insert*(..)) || " +
@@ -30,7 +30,11 @@ public class AutoFIllAspect {
             "execution(* com.lzx.mapper.DishMapper.insert*(..)) || " +
             "execution(* com.lzx.mapper.DishMapper.update*(..)) || " +
             "execution(* com.lzx.mapper.CategoryMapper.insert*(..)) || " +
-            "execution(* com.lzx.mapper.CategoryMapper.update*(..))";
+            "execution(* com.lzx.mapper.CategoryMapper.update*(..)) || " +
+            "execution(* com.lzx.mapper.SetmealMapper.insert*(..)) || " +
+            "execution(* com.lzx.mapper.SetmealMapper.update*(..))";
+
+
 
     /**
      * 自动填充方法

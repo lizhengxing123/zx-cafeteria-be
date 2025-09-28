@@ -18,22 +18,22 @@ import java.util.List;
  * [用户端] 菜品管理
  */
 @Slf4j
-@RestController
+@RestController("userDishController")
 @RequestMapping("/user/dishes")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DishController {
     private final DishService dishService;
 
     /**
-     * 根据分类 ID 查询菜品列表
+     * 根据分类 ID 查询菜品列表，含菜品口味
      *
      * @param categoryId 分类 ID
-     * @return Result<List < DishVo>> 菜品列表
+     * @return Result<List < DishVo>> 菜品列表（包含菜品口味）
      */
     @GetMapping("/list")
     public Result<List<DishVo>> listQuery(@RequestParam Long categoryId) {
         log.info("[用户端] 根据分类 ID 查询菜品列表：{}", categoryId);
-        List<DishVo> dishVoList = dishService.listQuery(categoryId);
+        List<DishVo> dishVoList = dishService.listQueryWithFlavors(categoryId);
         return Result.success(MessageConstant.QUERY_SUCCESS, dishVoList);
     }
 }

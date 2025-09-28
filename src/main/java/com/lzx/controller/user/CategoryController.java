@@ -18,7 +18,7 @@ import java.util.List;
  * [用户端] 分类管理
  */
 @Slf4j
-@RestController
+@RestController("userCategoryController")
 @RequestMapping("/user/categories")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryController {
@@ -32,7 +32,7 @@ public class CategoryController {
      * @return Result<List<Category>> 分类列表
      */
     @GetMapping("/list")
-    public Result<List<Category>> listQuery(@RequestParam Integer type) {
+    public Result<List<Category>> listQuery(@RequestParam(required = false) Integer type) {
         log.info("[用户端] 根据分类类型查询分类列表：{}", type);
         List<Category> categoryList = categoryService.listQuery(type);
         return Result.success(MessageConstant.QUERY_SUCCESS, categoryList);
