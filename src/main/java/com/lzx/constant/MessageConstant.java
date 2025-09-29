@@ -73,7 +73,7 @@ public class MessageConstant {
     public static final String ORDER_STATUS_ERROR = "订单状态错误";
     public static final String ORDER_NOT_FOUND = "订单不存在";
     public static final String PAYMENT_SUCCESS = "支付成功";
-
+    public static final String TIMEOUT_ORDER_CANCELLED = "订单超时，自动取消";
     /**
      * 其他相关
      */

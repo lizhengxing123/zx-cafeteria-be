@@ -5,7 +5,6 @@ import com.lzx.dto.OrderPaymentDto;
 import com.lzx.dto.OrderSubmitDto;
 import com.lzx.result.Result;
 import com.lzx.service.OrderService;
-import com.lzx.service.UserService;
 import com.lzx.vo.OrderSubmitVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
