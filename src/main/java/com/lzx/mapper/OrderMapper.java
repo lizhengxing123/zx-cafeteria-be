@@ -1,7 +1,8 @@
 package com.lzx.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lzx.entity.Orders;
+import com.lzx.entity.Order;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.lzx.entity.Orders;
  * @author 李正星
  * @since 2025-09-22
  */
-public interface OrdersMapper extends BaseMapper<Orders> {
+@Mapper
+public interface OrderMapper extends BaseMapper<Order> {
 
 }

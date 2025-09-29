@@ -2,9 +2,8 @@ package com.lzx.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -18,10 +17,12 @@ import java.time.LocalDateTime;
  * @author 李正星
  * @since 2025-09-22
  */
-@Getter
-@Setter
-@ToString
-public class Orders implements Serializable {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@TableName("orders")
+public class Order implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -69,7 +70,7 @@ public class Orders implements Serializable {
     /**
      * 支付状态 0未支付 1已支付 2退款
      */
-    private Byte payStatus;
+    private Integer payStatus;
 
     /**
      * 实收金额
@@ -124,7 +125,7 @@ public class Orders implements Serializable {
     /**
      * 配送状态  1立即送出  0选择具体时间
      */
-    private Boolean deliveryStatus;
+    private Integer deliveryStatus;
 
     /**
      * 送达时间
@@ -134,7 +135,7 @@ public class Orders implements Serializable {
     /**
      * 打包费
      */
-    private Integer packAmount;
+    private Long packAmount;
 
     /**
      * 餐具数量
@@ -144,5 +145,5 @@ public class Orders implements Serializable {
     /**
      * 餐具数量状态  1按餐量提供  0选择具体数量
      */
-    private Boolean tablewareStatus;
+    private Integer tablewareStatus;
 }
