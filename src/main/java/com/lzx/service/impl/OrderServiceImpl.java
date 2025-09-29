@@ -3,6 +3,7 @@ package com.lzx.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lzx.constant.MessageConstant;
 import com.lzx.constant.StatusConstant;
+import com.lzx.dto.OrderPaymentDto;
 import com.lzx.dto.OrderSubmitDto;
 import com.lzx.entity.AddressBook;
 import com.lzx.entity.Order;
@@ -24,8 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -80,6 +81,27 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+    /**
+     * 支付订单
+     *
+     * @param orderPaymentDto 订单支付数据传输对象
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void payment(OrderPaymentDto orderPaymentDto) {
+        // 1、处理业务异常
+        // 校验订单是否存在
+        Order order = checkOrderExists(orderPaymentDto.getOrderNumber());
+        // 校验支付状态是否为待支付
+        checkPayStatus(order);
+
+        // 2、更新订单支付状态：已付款
+        order.setPayStatus(StatusConstant.PAID);
+        // 3、更新订单状态：待接单
+        order.setStatus(StatusConstant.WAIT_ACCEPT);
+        orderMapper.updateById(order);
+    }
+
     // ------------------------------ 私有工具方法 ------------------------------
 
     /**
@@ -108,6 +130,35 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
         }
         return shoppingCartList;
+    }
+
+    /**
+     * 校验订单是否存在
+     *
+     * @param orderNumber 订单号
+     * @return 订单实体对象
+     */
+    private Order checkOrderExists(String orderNumber) {
+        Order order = orderMapper.selectOne(
+                new LambdaQueryWrapper<Order>()
+                        .eq(Order::getNumber, orderNumber)
+                        .eq(Order::getUserId, SecurityUtil.getCurrentUserId())
+        );
+        if (order == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        return order;
+    }
+
+    /**
+     * 校验支付状态是否为待支付
+     *
+     * @param order 订单实体对象
+     */
+    private void checkPayStatus(Order order) {
+        if (!Objects.equals(order.getPayStatus(), StatusConstant.WAIT_PAYMENT)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
     }
 
     /**

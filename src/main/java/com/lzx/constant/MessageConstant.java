@@ -72,6 +72,8 @@ public class MessageConstant {
     public static final String PASSWORD_EDIT_FAILED = "密码修改失败";
     public static final String ORDER_STATUS_ERROR = "订单状态错误";
     public static final String ORDER_NOT_FOUND = "订单不存在";
+    public static final String PAYMENT_SUCCESS = "支付成功";
+
     /**
      * 其他相关
      */

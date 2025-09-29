@@ -1,5 +1,6 @@
 package com.lzx.service;
 
+import com.lzx.dto.OrderPaymentDto;
 import com.lzx.dto.OrderSubmitDto;
 import com.lzx.vo.OrderSubmitVo;
 
@@ -14,4 +15,11 @@ public interface OrderService {
      * @return 订单提交成功返回的视图对象
      */
     OrderSubmitVo submitOrder(OrderSubmitDto orderSubmitDto);
+
+    /**
+     * 支付订单
+     *
+     * @param orderPaymentDto 订单支付数据传输对象
+     */
+    void payment(OrderPaymentDto orderPaymentDto);
 }
