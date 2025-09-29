@@ -14,7 +14,7 @@ import java.util.Base64;
  * RSA密钥对配置（生产环境建议从安全存储加载，而非动态生成）
  */
 @Configuration
-public class RsaKeyConfig {
+public class RsaKeyConfiguration {
 
     // 可从配置文件指定密钥，若未指定则动态生成
     @Value("${zx.rsa.public-key}")

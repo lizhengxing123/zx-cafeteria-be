@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
  * mybatis-plus配置类
  */
 @Configuration
-public class MybatisPlusConfig {
+public class MybatisPlusConfiguration {
 
     // 添加拦截器
     @Bean
