@@ -10,4 +10,9 @@ public class StatusConstant {
 
     //禁用
     public static final Integer DISABLE = 0;
+
+    // 默认地址
+    public static final Integer DEFAULT = 1;
+     // 非默认地址
+    public static final Integer NOT_DEFAULT = 0;
 }

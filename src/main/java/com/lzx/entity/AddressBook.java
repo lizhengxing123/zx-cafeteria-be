@@ -3,9 +3,7 @@ package com.lzx.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -17,9 +15,10 @@ import java.io.Serializable;
  * @author 李正星
  * @since 2025-09-22
  */
-@Getter
-@Setter
-@ToString
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @TableName("address_book")
 public class AddressBook implements Serializable {
 
@@ -94,5 +93,5 @@ public class AddressBook implements Serializable {
     /**
      * 默认 0 否 1是
      */
-    private Boolean isDefault;
+    private Integer isDefault;
 }
