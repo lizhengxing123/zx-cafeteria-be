@@ -79,4 +79,5 @@ public class MessageConstant {
      * 其他相关
      */
     public static final String UNKNOWN_ERROR = "未知错误";
+    public static final String INVALID_DATE_RANGE = "无效的日期范围：开始日期不能晚于结束日期";
 }
