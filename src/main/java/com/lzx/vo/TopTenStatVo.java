@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 
 /**
  * 销量排名 TOP10 视图对象
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TopTenStatVo {
+public class TopTenStatVo implements Serializable {
     /**
      * 销量排名 TOP10 菜品、套餐名称
      */

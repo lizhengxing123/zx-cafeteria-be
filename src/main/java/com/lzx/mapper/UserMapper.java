@@ -22,11 +22,11 @@ import java.util.Map;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
     /**
-     * 根据日期范围查询用户总数
+     * 根据日期范围查询新用户总数
      *
      * @param beginTime 开始时间
      * @param endTime   结束时间
-     * @return 用户总数统计结果
+     * @return 新用户总数统计结果
      */
     @MapKey("date")
     Map<String, Map<String, Object>> selectCountByDateRange(LocalDateTime beginTime, LocalDateTime endTime);

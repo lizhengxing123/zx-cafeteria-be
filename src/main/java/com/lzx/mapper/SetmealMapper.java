@@ -8,6 +8,7 @@ import com.lzx.entity.Dish;
 import com.lzx.entity.Setmeal;
 import com.lzx.vo.DishItemVO;
 import com.lzx.vo.DishVo;
+import com.lzx.vo.SetmealOverviewVo;
 import com.lzx.vo.SetmealVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -54,4 +55,14 @@ public interface SetmealMapper extends BaseMapper<Setmeal> {
             "left join dish d on sd.dish_id = d.id " +
             "where sd.setmeal_id = #{setmealId}")
     List<DishItemVO> selectDishItemsById(Long setmealId);
+
+     /**
+      * 查询套餐起售和停售数量
+      *
+      * @return 套餐起售和停售数量
+      */
+     @Select("select sum(IF(status = 1, 1, 0)) as soldCount, " +
+             "sum(IF(status = 0, 1, 0)) as discontinuedCount " +
+             "from setmeal")
+     SetmealOverviewVo countSetmealStatus();
 }
