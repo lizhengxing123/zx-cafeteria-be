@@ -3,7 +3,7 @@
 <mapper namespace="com.lzx.mapper.OrderMapper">
 
     <select id="selectDataByDateRange" resultType="java.util.Map">
-        select date_format(order_time, '%Y-%m-%d') as orderDate,
+        select date_format(order_time, '%Y-%m-%d') as date,
                sum(amount)                         as totalAmount
         from orders
         where order_time &gt;= #{begin}

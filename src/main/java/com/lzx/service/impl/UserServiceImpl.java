@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 /**
  * 用户管理服务实现类
  */
@@ -44,6 +46,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             user = new User();
             user.setOpenid(openid);
+            user.setCreateTime(LocalDateTime.now());
             userMapper.insert(user);
         }
         // 2.2 如果用户存在，直接返回用户信息

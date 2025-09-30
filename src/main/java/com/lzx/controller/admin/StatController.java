@@ -4,6 +4,7 @@ import com.lzx.constant.MessageConstant;
 import com.lzx.result.Result;
 import com.lzx.service.StatService;
 import com.lzx.vo.TurnoverStatVo;
+import com.lzx.vo.UserStatVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,25 @@ public class StatController {
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end
     ) {
-        log.info("营业额统计");
-        List<TurnoverStatVo> map = statService.turnover(begin, end);
-        return Result.success(MessageConstant.QUERY_SUCCESS, map);
+        log.info("营业额统计, begin: {}, end: {}", begin, end);
+        List<TurnoverStatVo> turnoverStatVoList = statService.turnoverStat(begin, end);
+        return Result.success(MessageConstant.QUERY_SUCCESS, turnoverStatVoList);
+    }
+
+    /**
+     * 用户统计
+     *
+     * @param begin 开始日期
+     * @param end   结束日期
+     * @return 用户统计结果
+     */
+    @GetMapping("/user")
+    public Result<List<UserStatVo>> user(
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end
+    ) {
+        log.info("用户统计, begin: {}, end: {}", begin, end);
+        List<UserStatVo> userStatVoList = statService.userStat(begin, end);
+        return Result.success(MessageConstant.QUERY_SUCCESS, userStatVoList);
     }
 }

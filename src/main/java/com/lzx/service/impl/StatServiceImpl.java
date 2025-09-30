@@ -3,10 +3,14 @@ package com.lzx.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lzx.constant.StatusConstant;
 import com.lzx.entity.Order;
+import com.lzx.entity.User;
 import com.lzx.mapper.OrderMapper;
+import com.lzx.mapper.UserMapper;
 import com.lzx.service.StatService;
 import com.lzx.vo.TurnoverStatVo;
+import com.lzx.vo.UserStatVo;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.MapKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 统计分析服务实现类
@@ -26,6 +31,8 @@ import java.util.Map;
 public class StatServiceImpl implements StatService {
 
     private final OrderMapper orderMapper;
+    private final UserMapper userMapper;
+
 
     /**
      * 营业额统计
@@ -35,7 +42,7 @@ public class StatServiceImpl implements StatService {
      * @return 营业额统计结果
      */
     @Override
-    public List<TurnoverStatVo> turnover(LocalDate begin, LocalDate end) {
+    public List<TurnoverStatVo> turnoverStat(LocalDate begin, LocalDate end) {
         // 根据开始日期和结束日期查询每天已完成的订单，并计算每天总的营业额
         List<TurnoverStatVo> turnoverStatVoList = new ArrayList<TurnoverStatVo>();
 
@@ -43,22 +50,15 @@ public class StatServiceImpl implements StatService {
         List<LocalDate> dateRange = getDateRange(begin, end);
 
         // 2、 使用数据库聚合查询，直接计算每天的营业额
-        // 这里我们需要编写自定义SQL或使用MyBatis-Plus的复杂查询功能
-        // 假设我们添加了一个自定义的mapper方法来执行聚合查询
-        List<Map<String, Object>> turnoverData = orderMapper.selectDataByDateRange(begin, end, StatusConstant.COMPLETED);
+        Map<String, Map<String, Object>> turnoverMap = orderMapper.selectDataByDateRange(begin, end, StatusConstant.COMPLETED);
 
-        // 3、构建日期到营业额的映射
-        Map<String, BigDecimal> turnoverMap = new HashMap<>();
-        for (Map<String, Object> data : turnoverData) {
-            String date = (String) data.get("orderDate");
-            BigDecimal amount = new BigDecimal(data.get("totalAmount").toString());
-            turnoverMap.put(date, amount);
-        }
-
-        // 4、准备返回结果
+        // 3、准备返回结果
         for (LocalDate date : dateRange) {
             String dateStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
-            BigDecimal amount = turnoverMap.getOrDefault(dateStr, BigDecimal.ZERO);
+            BigDecimal amount = BigDecimal.ZERO;
+            if (turnoverMap.containsKey(dateStr)) {
+                amount = (BigDecimal) turnoverMap.get(dateStr).getOrDefault("totalAmount", BigDecimal.ZERO);
+            }
             turnoverStatVoList.add(TurnoverStatVo.builder()
                     .date(dateStr)
                     .amount(amount)
@@ -67,6 +67,47 @@ public class StatServiceImpl implements StatService {
 
         // 返回统计结果
         return turnoverStatVoList;
+    }
+
+    /**
+     * 用户统计
+     *
+     * @param begin 开始日期
+     * @param end   结束日期
+     * @return 用户统计结果
+     */
+    public List<UserStatVo> userStat(LocalDate begin, LocalDate end) {
+        // 根据开始日期和结束日期查询每天新增用户数和总用户数
+        List<UserStatVo> userStatVoList = new ArrayList<UserStatVo>();
+
+        // 1、计算日期范围内的所有日期
+        List<LocalDate> dateRange = getDateRange(begin, end);
+        // 2、计算每天新增的用户数
+        Map<String, Map<String, Object>> newUserCountMap = userMapper.selectCountByDateRange(
+                begin.atStartOfDay(), end.plusDays(1).atStartOfDay().minusSeconds(1));
+        // 3、计算开始时间之前的总人数
+        Long totalUserCount = userMapper.selectCount(
+                new LambdaQueryWrapper<User>().lt(User::getCreateTime, begin.atStartOfDay())
+        );
+
+        // 4、遍历日期范围，计算每天的总用户数
+        for (LocalDate date : dateRange) {
+            String dateStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            Long newCount = 0L;
+            if (newUserCountMap.containsKey(dateStr)) {
+                newCount = (Long) newUserCountMap.get(dateStr).getOrDefault("newCount", 0);
+            }
+            totalUserCount += newCount;
+
+            // 构建UserStatVo对象
+            userStatVoList.add(UserStatVo.builder()
+                    .date(dateStr)
+                    .newCount(newCount)
+                    .totalCount(totalUserCount)
+                    .build());
+        }
+
+        return userStatVoList;
     }
 
     // ------------------------私有方法------------------------

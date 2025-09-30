@@ -2,4 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lzx.mapper.UserMapper">
 
+    <select id="selectCountByDateRange" resultType="java.util.Map">
+        SELECT
+        DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+        COUNT(*) AS newCount
+        FROM
+        user
+        <where>
+            <if test="beginTime != null">
+                create_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND create_time &lt;= #{endTime}
+            </if>
+        </where>
+        GROUP BY
+        DATE_FORMAT(create_time, '%Y-%m-%d')
+    </select>
 </mapper>

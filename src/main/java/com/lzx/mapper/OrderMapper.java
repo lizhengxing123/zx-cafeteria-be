@@ -2,6 +2,7 @@ package com.lzx.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lzx.entity.Order;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.time.LocalDate;
@@ -26,7 +27,8 @@ public interface OrderMapper extends BaseMapper<Order> {
      * @param status 订单状态
      * @return 营业额统计结果
      */
-    List<Map<String, Object>> selectDataByDateRange(LocalDate begin, LocalDate end, Integer status);
+    @MapKey("date")
+    Map<String, Map<String, Object>> selectDataByDateRange(LocalDate begin, LocalDate end, Integer status);
 
 }
 
