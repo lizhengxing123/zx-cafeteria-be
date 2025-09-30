@@ -9,10 +9,7 @@ import com.lzx.vo.OrderSubmitVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * [用户端] 订单管理
@@ -20,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController("userOrderController")
 @RequestMapping("/user/orders")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class OrderController {
 
     private final OrderService orderService;
@@ -49,5 +46,18 @@ public class OrderController {
         log.info("用户支付订单：{}", orderPaymentDto);
         orderService.payment(orderPaymentDto);
         return Result.success(MessageConstant.PAYMENT_SUCCESS);
+    }
+
+    /**
+     * 客户催单
+     *
+     * @param orderNumber 订单编号
+     * @return 催单成功返回的信息
+     */
+    @PostMapping("/reminder/{orderNumber}")
+    public Result<String> reminder(@PathVariable String orderNumber) {
+        log.info("用户催单：{}", orderNumber);
+        orderService.reminder(orderNumber);
+        return Result.success(MessageConstant.REMINDER_SUCCESS);
     }
 }

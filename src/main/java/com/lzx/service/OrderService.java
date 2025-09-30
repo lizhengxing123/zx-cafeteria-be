@@ -22,4 +22,11 @@ public interface OrderService {
      * @param orderPaymentDto 订单支付数据传输对象
      */
     void payment(OrderPaymentDto orderPaymentDto);
+
+    /**
+     * 客户催单
+     *
+     * @param orderNumber 订单编号
+     */
+    void reminder(String orderNumber);
 }

@@ -16,7 +16,7 @@ import java.util.List;
  * 地址簿服务实现类
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class AddressBookServiceImpl implements AddressBookService {
 
     private final AddressBookMapper addressBookMapper;

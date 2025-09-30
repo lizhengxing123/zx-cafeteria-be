@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @RestController("userSetmealController")
 @RequestMapping("/user/setmeals")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SetmealController {
     private final SetmealService setmealService;
 

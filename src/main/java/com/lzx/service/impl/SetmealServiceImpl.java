@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * 套餐服务实现类
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SetmealServiceImpl implements SetmealService {
     private static final String SERVICE_NAME = "套餐";
 

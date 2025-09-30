@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @RestController("userCategoryController")
 @RequestMapping("/user/categories")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class CategoryController {
 
     private final CategoryService categoryService;

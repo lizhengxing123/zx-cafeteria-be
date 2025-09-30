@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * Redis 常用操作
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;

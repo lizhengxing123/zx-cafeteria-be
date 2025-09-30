@@ -22,7 +22,7 @@ import java.util.List;
  * 购物车服务实现
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     private final ShoppingCartMapper shoppingCartMapper;

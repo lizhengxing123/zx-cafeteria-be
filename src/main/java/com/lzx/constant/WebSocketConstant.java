@@ -12,5 +12,5 @@ public class WebSocketConstant {
     /**
      * 客户催单消息类型
      */
-    public static final Integer TYPE_ORDER_URGENT = 2;
+    public static final Integer TYPE_ORDER_REMINDER = 2;
 }

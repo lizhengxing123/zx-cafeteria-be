@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * 订单服务实现类
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
@@ -91,7 +91,6 @@ public class OrderServiceImpl implements OrderService {
      * @param orderPaymentDto 订单支付数据传输对象
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void payment(OrderPaymentDto orderPaymentDto) {
         // 1、处理业务异常
         // 校验订单是否存在
@@ -112,6 +111,28 @@ public class OrderServiceImpl implements OrderService {
         webSocketServer.sendMessage(
                 WebSocketVo.builder()
                         .type(WebSocketConstant.TYPE_ORDER_REMIND)
+                        .orderId(order.getId())
+                        .content("订单号：" + order.getNumber())
+                        .build()
+        );
+    }
+
+    /**
+     * 客户催单
+     *
+     * @param orderNumber 订单编号
+     */
+    public void reminder(String orderNumber) {
+        // 1、处理业务异常
+        // 校验订单是否存在
+        Order order = checkOrderExists(orderNumber);
+        // 校验订单状态是否为待接单且支付状态为已付款
+        checkAcceptStatus(order);
+
+        // 2、发送消息给客户端
+        webSocketServer.sendMessage(
+                WebSocketVo.builder()
+                        .type(WebSocketConstant.TYPE_ORDER_REMINDER)
                         .orderId(order.getId())
                         .content("订单号：" + order.getNumber())
                         .build()
@@ -174,6 +195,18 @@ public class OrderServiceImpl implements OrderService {
     private void checkPayStatus(Order order) {
         if (!Objects.equals(order.getPayStatus(), StatusConstant.WAIT_PAYMENT) ||
                 !Objects.equals(order.getStatus(), StatusConstant.WAIT_PAY)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+    }
+
+    /**
+     * 校验订单状态是否为待接单且支付状态为已付款
+     *
+     * @param order 订单实体对象
+     */
+    private void checkAcceptStatus(Order order) {
+        if (!Objects.equals(order.getStatus(), StatusConstant.WAIT_ACCEPT) ||
+                !Objects.equals(order.getPayStatus(), StatusConstant.PAID)) {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
     }
