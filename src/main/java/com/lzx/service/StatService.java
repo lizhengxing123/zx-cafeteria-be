@@ -1,5 +1,6 @@
 package com.lzx.service;
 
+import com.lzx.vo.OrderStatVo;
 import com.lzx.vo.TurnoverStatVo;
 import com.lzx.vo.UserStatVo;
 
@@ -28,4 +29,13 @@ public interface StatService {
      * @return 用户统计结果
      */
     List<UserStatVo> userStat(LocalDate begin, LocalDate end);
+
+    /**
+     * 订单统计
+     *
+     * @param begin 开始日期
+     * @param end   结束日期
+     * @return 订单统计结果
+     */
+    List<OrderStatVo> orderStat(LocalDate begin, LocalDate end);
 }

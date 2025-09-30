@@ -2,13 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lzx.mapper.OrderMapper">
 
-    <select id="selectDataByDateRange" resultType="java.util.Map">
+    <select id="selectTurnoverByDateRange" resultType="java.util.Map">
         select date_format(order_time, '%Y-%m-%d') as date,
                sum(amount)                         as totalAmount
         from orders
         where order_time &gt;= #{begin}
           AND order_time &lt; #{end} + INTERVAL 1 DAY
           and status = #{status}
+        group by date_format(order_time, '%Y-%m-%d')
+    </select>
+    <select id="selectCountByDateRange" resultType="java.util.Map">
+        select date_format(order_time, '%Y-%m-%d') as date,
+               count(*)                            as totalCount,
+               sum(IF(status = #{status}, 1, 0))   as statusCount
+        from orders
+        where order_time &gt;= #{begin}
+          AND order_time &lt; #{end} + INTERVAL 1 DAY
         group by date_format(order_time, '%Y-%m-%d')
     </select>
 </mapper>

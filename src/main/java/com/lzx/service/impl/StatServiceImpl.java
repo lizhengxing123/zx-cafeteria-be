@@ -7,6 +7,8 @@ import com.lzx.entity.User;
 import com.lzx.mapper.OrderMapper;
 import com.lzx.mapper.UserMapper;
 import com.lzx.service.StatService;
+import com.lzx.vo.OrderStatItemVo;
+import com.lzx.vo.OrderStatVo;
 import com.lzx.vo.TurnoverStatVo;
 import com.lzx.vo.UserStatVo;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +52,7 @@ public class StatServiceImpl implements StatService {
         List<LocalDate> dateRange = getDateRange(begin, end);
 
         // 2、 使用数据库聚合查询，直接计算每天的营业额
-        Map<String, Map<String, Object>> turnoverMap = orderMapper.selectDataByDateRange(begin, end, StatusConstant.COMPLETED);
+        Map<String, Map<String, Object>> turnoverMap = orderMapper.selectTurnoverByDateRange(begin, end, StatusConstant.COMPLETED);
 
         // 3、准备返回结果
         for (LocalDate date : dateRange) {
@@ -109,6 +111,71 @@ public class StatServiceImpl implements StatService {
 
         return userStatVoList;
     }
+
+    /**
+     * 订单统计
+     *
+     * @param begin 开始日期
+     * @param end   结束日期
+     * @return 订单统计结果
+     */
+    @Override
+    public List<OrderStatVo> orderStat(LocalDate begin, LocalDate end) {
+        // 根据开始日期和结束日期查询每天订单数和日期区间的订单数
+        List<OrderStatVo> orderStatVoList = new ArrayList<OrderStatVo>();
+
+        // 1、计算日期范围内的所有日期
+        List<LocalDate> dateRange = getDateRange(begin, end);
+
+        // 2、使用一条SQL查询每天的订单总数和有效订单数
+        Map<String, Map<String, Object>> orderCountMap = orderMapper.selectCountByDateRange(begin, end, StatusConstant.COMPLETED);
+
+        // 3、计算整个日期区间的订单总数和有效订单数
+        long totalCount = 0L;
+        long completedCount = 0L;
+        List<OrderStatItemVo> records = new ArrayList<>();
+
+        for (LocalDate date : dateRange) {
+            String dateStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            long dayTotalCount = 0L;
+            long dayCompletedCount = 0L;
+
+            if (orderCountMap.containsKey(dateStr)) {
+                Map<String, Object> countMap = orderCountMap.get(dateStr);
+                dayTotalCount = (Long) countMap.getOrDefault("totalCount", 0L);
+                // statusCount 是 BigDecimal 类型，需要转换为 Long
+                dayCompletedCount = ((BigDecimal) countMap.getOrDefault("statusCount", BigDecimal.ZERO)).longValue();
+            }
+
+            totalCount += dayTotalCount;
+            completedCount += dayCompletedCount;
+
+            // 添加当天订单统计
+            records.add(OrderStatItemVo.builder()
+                    .date(dateStr)
+                    .count(dayCompletedCount)
+                    .totalCount(dayTotalCount)
+                    .build());
+        }
+
+        // 4、计算订单完成率，保留两位小数
+        double rate = 0.0;
+        if (totalCount > 0) {
+            rate = Math.round(((double) completedCount / totalCount) * 100) / 100.00;
+        }
+
+        // 5、构建并返回订单统计结果
+        OrderStatVo orderStatVo = OrderStatVo.builder()
+                .count(completedCount)
+                .totalCount(totalCount)
+                .rate(rate)
+                .records(records)
+                .build();
+
+        orderStatVoList.add(orderStatVo);
+        return orderStatVoList;
+    }
+
 
     // ------------------------私有方法------------------------
 

@@ -1,8 +1,10 @@
 package com.lzx.controller.admin;
 
 import com.lzx.constant.MessageConstant;
+import com.lzx.entity.Order;
 import com.lzx.result.Result;
 import com.lzx.service.StatService;
+import com.lzx.vo.OrderStatVo;
 import com.lzx.vo.TurnoverStatVo;
 import com.lzx.vo.UserStatVo;
 import lombok.RequiredArgsConstructor;
@@ -60,5 +62,22 @@ public class StatController {
         log.info("用户统计, begin: {}, end: {}", begin, end);
         List<UserStatVo> userStatVoList = statService.userStat(begin, end);
         return Result.success(MessageConstant.QUERY_SUCCESS, userStatVoList);
+    }
+
+    /**
+     * 订单统计
+     *
+     * @param begin 开始日期
+     * @param end   结束日期
+     * @return 订单统计结果
+     */
+    @GetMapping("/order")
+    public Result<List<OrderStatVo>> order(
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end
+    ) {
+        log.info("订单统计, begin: {}, end: {}", begin, end);
+        List<OrderStatVo> orderStatVoList = statService.orderStat(begin, end);
+        return Result.success(MessageConstant.QUERY_SUCCESS, orderStatVoList);
     }
 }

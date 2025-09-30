@@ -28,7 +28,17 @@ public interface OrderMapper extends BaseMapper<Order> {
      * @return 营业额统计结果
      */
     @MapKey("date")
-    Map<String, Map<String, Object>> selectDataByDateRange(LocalDate begin, LocalDate end, Integer status);
+    Map<String, Map<String, Object>> selectTurnoverByDateRange(LocalDate begin, LocalDate end, Integer status);
 
+    /**
+     * 根据日期范围统计订单数：已完成的订单数和总订单数
+     *
+     * @param begin 开始日期
+     * @param end 结束日期
+     * @param status 订单状态
+     * @return 订单统计结果
+     */
+    @MapKey("date")
+    Map<String, Map<String, Object>> selectCountByDateRange(LocalDate begin, LocalDate end, Integer status);
 }
 
