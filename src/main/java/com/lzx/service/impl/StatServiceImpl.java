@@ -2,17 +2,13 @@ package com.lzx.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lzx.constant.StatusConstant;
-import com.lzx.entity.Order;
 import com.lzx.entity.User;
+import com.lzx.mapper.OrderDetailMapper;
 import com.lzx.mapper.OrderMapper;
 import com.lzx.mapper.UserMapper;
 import com.lzx.service.StatService;
-import com.lzx.vo.OrderStatItemVo;
-import com.lzx.vo.OrderStatVo;
-import com.lzx.vo.TurnoverStatVo;
-import com.lzx.vo.UserStatVo;
+import com.lzx.vo.*;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.annotations.MapKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +16,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 统计分析服务实现类
@@ -34,6 +28,7 @@ public class StatServiceImpl implements StatService {
 
     private final OrderMapper orderMapper;
     private final UserMapper userMapper;
+    private final OrderDetailMapper orderDetailMapper;
 
 
     /**
@@ -174,6 +169,23 @@ public class StatServiceImpl implements StatService {
 
         orderStatVoList.add(orderStatVo);
         return orderStatVoList;
+    }
+
+    /**
+     * 销量排名 TOP10
+     *
+     * @param begin 开始日期
+     * @param end   结束日期
+     * @return 销量排名 TOP10 结果
+     */
+    @Override
+    public List<TopTenStatVo> topTenStat(LocalDate begin, LocalDate end) {
+        // 根据开始日期和结束日期查询销量排名 TOP10
+        return orderDetailMapper.selectTopTenByDateRange(
+                begin.atStartOfDay(),
+                end.plusDays(1).atStartOfDay().minusSeconds(1),
+                StatusConstant.COMPLETED
+        );
     }
 
 

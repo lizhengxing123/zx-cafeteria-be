@@ -4,9 +4,7 @@ import com.lzx.constant.MessageConstant;
 import com.lzx.entity.Order;
 import com.lzx.result.Result;
 import com.lzx.service.StatService;
-import com.lzx.vo.OrderStatVo;
-import com.lzx.vo.TurnoverStatVo;
-import com.lzx.vo.UserStatVo;
+import com.lzx.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,5 +77,22 @@ public class StatController {
         log.info("订单统计, begin: {}, end: {}", begin, end);
         List<OrderStatVo> orderStatVoList = statService.orderStat(begin, end);
         return Result.success(MessageConstant.QUERY_SUCCESS, orderStatVoList);
+    }
+
+    /**
+     * 销量排名 TOP10
+     *
+     * @param begin 开始日期
+     * @param end   结束日期
+     * @return 销量排名 TOP10 结果
+     */
+    @GetMapping("/top10")
+    public Result<List<TopTenStatVo>> topTen(
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end
+    ) {
+        log.info("销量排名 TOP10, begin: {}, end: {}", begin, end);
+        List<TopTenStatVo> topTenStatVoList = statService.topTenStat(begin, end);
+        return Result.success(MessageConstant.QUERY_SUCCESS, topTenStatVoList);
     }
 }
