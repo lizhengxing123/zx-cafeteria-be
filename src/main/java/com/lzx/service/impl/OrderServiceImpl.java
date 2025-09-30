@@ -3,6 +3,7 @@ package com.lzx.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lzx.constant.MessageConstant;
 import com.lzx.constant.StatusConstant;
+import com.lzx.constant.WebSocketConstant;
 import com.lzx.dto.OrderPaymentDto;
 import com.lzx.dto.OrderSubmitDto;
 import com.lzx.entity.AddressBook;
@@ -17,6 +18,8 @@ import com.lzx.mapper.ShoppingCartMapper;
 import com.lzx.service.OrderService;
 import com.lzx.utils.SecurityUtil;
 import com.lzx.vo.OrderSubmitVo;
+import com.lzx.vo.WebSocketVo;
+import com.lzx.websocket.WebSocketServer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailMapper orderDetailMapper;
     private final AddressBookMapper addressBookMapper;
     private final ShoppingCartMapper shoppingCartMapper;
+    private final WebSocketServer webSocketServer;
 
 
     /**
@@ -99,7 +103,19 @@ public class OrderServiceImpl implements OrderService {
         order.setPayStatus(StatusConstant.PAID);
         // 3、更新订单状态：待接单
         order.setStatus(StatusConstant.WAIT_ACCEPT);
+        // 4、更新结账时间
+        order.setCheckoutTime(LocalDateTime.now());
+        // 5、更新订单
         orderMapper.updateById(order);
+
+        // 6、发送消息给客户端
+        webSocketServer.sendMessage(
+                WebSocketVo.builder()
+                        .type(WebSocketConstant.TYPE_ORDER_REMIND)
+                        .orderId(order.getId())
+                        .content("订单号：" + order.getNumber())
+                        .build()
+        );
     }
 
     // ------------------------------ 私有工具方法 ------------------------------
@@ -151,12 +167,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 校验支付状态是否为待支付
+     * 校验支付状态是否为待支付，且订单状态为待付款
      *
      * @param order 订单实体对象
      */
     private void checkPayStatus(Order order) {
-        if (!Objects.equals(order.getPayStatus(), StatusConstant.WAIT_PAYMENT)) {
+        if (!Objects.equals(order.getPayStatus(), StatusConstant.WAIT_PAYMENT) ||
+                !Objects.equals(order.getStatus(), StatusConstant.WAIT_PAY)) {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
     }

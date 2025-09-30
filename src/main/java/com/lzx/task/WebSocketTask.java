@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * WebSocket任务类
  */
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WebSocketTask {
 

@@ -18,7 +18,7 @@ import java.util.List;
  * 订单定时任务类
  */
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderTask {
 

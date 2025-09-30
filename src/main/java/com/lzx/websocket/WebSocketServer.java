@@ -1,5 +1,7 @@
 package com.lzx.websocket;
 
+import com.alibaba.fastjson.JSON;
+import com.lzx.vo.WebSocketVo;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
@@ -72,6 +74,19 @@ public class WebSocketServer {
                 log.error("发送消息给客户端失败, sid: {}, message: {}", sid, message, e);
             }
         }
+    }
+
+    /**
+     * 发送自定义消息给指定客户端
+     *
+     * @param webSocketVo 消息内容
+     */
+    public void sendMessage(WebSocketVo webSocketVo) {
+        // 转成 JSON 字符串
+        String message = JSON.toJSONString(webSocketVo);
+        log.info("发送自定义消息给所有客户端, message: {}", message);
+        sendMessageToAll(message);
+//        sendMessage(webSocketVo.getOrderNumberId().toString(), message);
     }
 
     /**
